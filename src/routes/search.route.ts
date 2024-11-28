@@ -1,7 +1,5 @@
 import { Router, Request, Response } from "express";
-import axios from "axios";
-import * as cheerio from "cheerio";
-import { createSlug } from "../libs/createSlug";
+import puppeteer from "puppeteer";
 
 const router = Router();
 
@@ -11,39 +9,50 @@ router.get("/", async (req: Request, res: Response) => {
     const search = req.query.search;
 
     // URL yang akan di-scrape, tambahkan query ke dalam URL
-    const url = `https://oploverz.ch/?s=${search}`;
-    // Fetch data menggunakan axios
-    const { data } = await axios.get(url);
+    const url = `${process.env.ENDPOINT_ANIME}/?s=${search}`;
 
-    // Load data ke Cheerio
-    const $ = cheerio.load(data);
+    const browser = await puppeteer.launch({ headless: true });
 
-    // Contoh scraping data (mengambil semua yang dibutuhkan)
-    const animes: {
-      title: string;
-      type: string;
-      episode: string;
-      image: string;
-      slug: string;
-    }[] = [];
+    const page = await browser.newPage();
 
-    const lists = $(".bsx");
+    await page.goto(url, { waitUntil: "networkidle2" });
 
-    lists.each((i, element) => {
-      const self = $(element);
-      const title = self
-        .find(".tt")
-        .contents()
-        .filter((n, el) => el.type === "text")
-        .text()
-        .trim();
-      const type = self.find(".typez").text();
-      const episode = self.find(".epx").text();
-      const image = self.find("img").attr("src") || "";
-      const fullTitle = self.find("a").attr("title") || "";
-      const slug = createSlug(fullTitle);
-      animes.push({ title, type, episode, image, slug });
-    });
+    await page.waitForSelector(".bs");
+
+    const animes = await page.$$eval(".bs", (listAnime) =>
+      listAnime.map((anime) => {
+        const title =
+          anime
+            .querySelector(".tt")
+            ?.childNodes[0]?.textContent?.replace(/[\t\n]+/g, "")
+            .trim() || "";
+
+        const fullTitle =
+          anime
+            .querySelector("h2")
+            ?.textContent?.replace(/[\t\n]+/g, "")
+            .trim() || "";
+
+        const slug = fullTitle
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+
+        const thumbnailSrc = anime.querySelector("img")?.getAttribute("src");
+
+        const thumbnail = thumbnailSrc?.replace(/\?resize=\d+,\d+$/, "");
+
+        const type = anime.querySelector(".typez")?.textContent;
+
+        const episode = anime.querySelector(".epx")?.textContent;
+
+        const lang = anime.querySelector(".sb")?.textContent;
+
+        return { title, slug, thumbnail, type, episode, lang };
+      })
+    );
+
+    await browser.close();
 
     // Kirim response JSON
     res.json({

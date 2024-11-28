@@ -1,6 +1,5 @@
 import { Router, Request, Response } from "express";
-import axios from "axios";
-import * as cheerio from "cheerio";
+import puppeteer from "puppeteer";
 
 const router = Router();
 
@@ -8,76 +7,91 @@ router.get("/:slug", async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;
 
-    const url = `https://oploverz.ch/series/${slug}`;
+    const url = `${process.env.ENDPOINT_ANIME}/anime/${slug}`;
 
-    const { data } = await axios.get(url);
+    const browser = await puppeteer.launch({ headless: true });
 
-    const $ = cheerio.load(data);
+    const page = await browser.newPage();
 
-    const title = $("article").find(".entry-title").text().trim();
+    await page.goto(url, { waitUntil: "networkidle2" });
 
-    const originalTitle = $("article").find(".alter").text().trim();
+    await page.waitForSelector("article");
 
-    const spanEl = $("article").find("span");
+    const title = await page.$eval(".entry-title", (el) => el.textContent);
 
-    const textNodes = spanEl
-      .contents()
-      .filter((_, el) => el.type === "text")
-      .toArray();
+    const fullTitle = await page.$eval(".alter", (el) => el.textContent);
 
-    const status = textNodes[1] ? textNodes[1].data.trim() : null;
-
-    const studioSpan = $("span").filter((_, el) => {
-      return $(el).find("b").text().trim() === "Studio:";
+    const status = await page.$eval(".spe span", (element) => {
+      if (element.querySelector("b")?.textContent === "Status:") {
+        return element.textContent?.replace("Status:", "").trim();
+      }
+      return "";
     });
 
-    const studio = studioSpan.find("a").text().trim();
+    const studio = await page.$eval(".spe span a", (element) =>
+      element.textContent?.trim()
+    );
 
-    const released = textNodes[3] ? textNodes[3].data.trim() : null;
-
-    const seasonSpan = $("span").filter((_, el) => {
-      return $(el).find("b").text().trim() === "Season:";
+    const released = await page.$eval(".spe .split", (element) => {
+      if (element.querySelector("b")?.textContent === "Released:") {
+        return element.textContent?.replace("Released:", "").trim();
+      }
+      return "";
     });
 
-    const season = seasonSpan.find("a").text().trim();
+    const season = await page.$eval(".spe span:nth-child(4) a", (element) =>
+      element.textContent?.trim()
+    );
 
-    const type = textNodes[5] ? textNodes[5].data.trim() : null;
-
-    const episodes = textNodes[6] ? textNodes[6].data.trim() : null;
-
-    const releasedSpan = $("span").filter((_, el) => {
-      return $(el).find("b").text().trim() === "Released on:";
+    const type = await page.$eval(".spe span:nth-child(5)", (element) => {
+      return element.textContent?.replace("Type:", "").trim();
     });
 
-    const releasedOn = releasedSpan.find("time").attr("datetime");
-
-    const updatedSpan = $("span").filter((_, el) => {
-      return $(el).find("b").text().trim() === "Updated on:";
+    const episodes = await page.$eval(".spe span:nth-child(6)", (element) => {
+      return element.textContent?.replace("Episodes:", "").trim();
     });
 
-    const updateOn = updatedSpan.find("time").attr("datetime");
+    const updateOn = await page.$eval(
+      ".spe time[itemprop='datePublished']",
+      (element) => {
+        return element.getAttribute("datetime");
+      }
+    );
 
-    const genres = $(".genxed a")
-      .map((_, el) => $(el).text().trim())
-      .toArray();
+    const releasedOn = await page.$eval(
+      ".spe time[itemprop='dateModified']",
+      (element) => {
+        return element.getAttribute("datetime");
+      }
+    );
+
+    const genres = await page.$$eval(".genxed a[rel='tag']", (elements) => {
+      return elements.map((element) => element.textContent?.trim());
+    });
+
+    const synopsis = await page.$eval(".entry-content", (el) =>
+      el.textContent?.trim()
+    );
 
     res.json({
       success: true,
       data: {
         title,
-        originalTitle,
+        fullTitle,
         status,
         studio,
         released,
         season,
         type,
         episodes,
-        releasedOn,
         updateOn,
+        releasedOn,
         genres,
+        synopsis,
       },
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
       message: "Error while scraping data",
