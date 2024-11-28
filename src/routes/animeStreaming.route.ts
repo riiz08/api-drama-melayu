@@ -18,9 +18,13 @@ router.get("/:slug", async (req: Request, res: Response) => {
     await page.waitForSelector("iframe");
 
     // Ambil atribut src dari iframe
-    const videoSource = await page.$eval("iframe", (iframe) => iframe.src);
+    const videoSource =
+      (await page.$eval("iframe", (iframe) => iframe.src)) ||
+      "Video source not found";
 
-    const title = await page.$eval(".entry-title", (el) => el.textContent);
+    const title =
+      (await page.$eval(".entry-title", (el) => el.textContent)) ||
+      "Title not found";
 
     await browser.close();
 
@@ -28,8 +32,8 @@ router.get("/:slug", async (req: Request, res: Response) => {
     res.json({
       success: true,
       data: {
-        title,
-        videoSource,
+        title: title,
+        videoSource: videoSource,
       },
     });
   } catch (error) {

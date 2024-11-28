@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import puppeteer from "puppeteer";
+import { createSlug } from "../libs/createSlug";
 
 const router = Router();
 
@@ -69,9 +70,29 @@ router.get("/:slug", async (req: Request, res: Response) => {
       return elements.map((element) => element.textContent?.trim());
     });
 
+    const rating = await page.$eval(".rating strong", (el) => {
+      const text = el.textContent?.trim() || "";
+      const match = text.match(/[\d.]+/); // Mencari angka (termasuk desimal)
+      return match ? match[0] : null;
+    });
+
     const synopsis = await page.$eval(".entry-content", (el) =>
       el.textContent?.trim()
     );
+
+    const epList = await page.$$eval(".eplister ul li", (el) => {
+      return el.map((eps) => {
+        const epTitle = eps.querySelector(".epl-title")?.textContent;
+        const epLang = eps.querySelector(".epl-sub")?.textContent;
+        const epRelease = eps.querySelector(".epl-date")?.textContent;
+        const epSlug = epTitle
+          ?.toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+
+        return { epTitle, epLang, epRelease, epSlug };
+      });
+    });
 
     res.json({
       success: true,
@@ -87,7 +108,9 @@ router.get("/:slug", async (req: Request, res: Response) => {
         updateOn,
         releasedOn,
         genres,
+        rating,
         synopsis,
+        epList,
       },
     });
   } catch (error) {
