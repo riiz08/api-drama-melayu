@@ -9,11 +9,13 @@ import cors from "cors";
 dotenv.config();
 
 const app: Application = express();
+
+app.use(cors());
+
 const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
-app.use(cors());
 
 // Routes
 app.use("/api/v1/anime/latest-release", latestRelease);
