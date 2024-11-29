@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import animeStreaming from "./routes/animeStreaming.route";
 import latestRelease from "./routes/latestRelease.route";
 import animeDetail from "./routes/animeDetail.route";
+import cors from "cors";
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
+app.use(cors());
 
 // Routes
 app.use("/api/v1/anime/latest-release", latestRelease);
