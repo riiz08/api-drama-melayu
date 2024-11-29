@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
-import puppeteer from "puppeteer";
+import axios from "axios";
+import * as cheerio from "cheerio";
 import { createSlug } from "../libs/createSlug";
 
 const router = Router();
@@ -10,90 +11,68 @@ router.get("/:slug", async (req: Request, res: Response) => {
 
     const url = `${process.env.ENDPOINT_ANIME}/anime/${slug}`;
 
-    const browser = await puppeteer.launch({ headless: true });
+    // Ambil HTML menggunakan Axios
+    const { data: html } = await axios.get(url);
 
-    const page = await browser.newPage();
+    // Muat HTML ke Cheerio
+    const $ = cheerio.load(html);
 
-    await page.goto(url, { waitUntil: "networkidle2" });
+    // Ambil data menggunakan selector CSS
+    const title = $(".entry-title").text().trim();
 
-    await page.waitForSelector("article");
+    const fullTitle = $(".alter").text().trim();
 
-    const title = await page.$eval(".entry-title", (el) => el.textContent);
+    const status = $(".spe span")
+      .filter((_, el) => $(el).find("b").text() === "Status:")
+      .text()
+      .replace("Status:", "")
+      .trim();
 
-    const fullTitle = await page.$eval(".alter", (el) => el.textContent);
+    const studio = $(".spe span a").first().text().trim();
 
-    const status = await page.$eval(".spe span", (element) => {
-      if (element.querySelector("b")?.textContent === "Status:") {
-        return element.textContent?.replace("Status:", "").trim();
-      }
-      return "";
-    });
+    const released = $(".spe .split")
+      .filter((_, el) => $(el).find("b").text() === "Released:")
+      .text()
+      .replace("Released:", "")
+      .trim();
 
-    const studio = await page.$eval(".spe span a", (element) =>
-      element.textContent?.trim()
-    );
+    const season = $(".spe span:nth-child(4) a").text().trim();
 
-    const released = await page.$eval(".spe .split", (element) => {
-      if (element.querySelector("b")?.textContent === "Released:") {
-        return element.textContent?.replace("Released:", "").trim();
-      }
-      return "";
-    });
+    const type = $(".spe span:nth-child(5)").text().replace("Type:", "").trim();
 
-    const season = await page.$eval(".spe span:nth-child(4) a", (element) =>
-      element.textContent?.trim()
-    );
+    const episodes = $(".spe span:nth-child(6)")
+      .text()
+      .replace("Episodes:", "")
+      .trim();
 
-    const type = await page.$eval(".spe span:nth-child(5)", (element) => {
-      return element.textContent?.replace("Type:", "").trim();
-    });
+    const updateOn = $(".spe time[itemprop='datePublished']").attr("datetime");
 
-    const episodes = await page.$eval(".spe span:nth-child(6)", (element) => {
-      return element.textContent?.replace("Episodes:", "").trim();
-    });
+    const releasedOn = $(".spe time[itemprop='dateModified']").attr("datetime");
 
-    const updateOn = await page.$eval(
-      ".spe time[itemprop='datePublished']",
-      (element) => {
-        return element.getAttribute("datetime");
-      }
-    );
+    const genres = $(".genxed a[rel='tag']")
+      .map((_, el) => $(el).text().trim())
+      .get(); // Mengubah hasil ke array
 
-    const releasedOn = await page.$eval(
-      ".spe time[itemprop='dateModified']",
-      (element) => {
-        return element.getAttribute("datetime");
-      }
-    );
+    const rating =
+      $(".rating strong")
+        .text()
+        .trim()
+        .match(/[\d.]+/)?.[0] || null;
 
-    const genres = await page.$$eval(".genxed a[rel='tag']", (elements) => {
-      return elements.map((element) => element.textContent?.trim());
-    });
+    const synopsis = $(".entry-content").text().trim();
 
-    const rating = await page.$eval(".rating strong", (el) => {
-      const text = el.textContent?.trim() || "";
-      const match = text.match(/[\d.]+/); // Mencari angka (termasuk desimal)
-      return match ? match[0] : null;
-    });
-
-    const synopsis = await page.$eval(".entry-content", (el) =>
-      el.textContent?.trim()
-    );
-
-    const epList = await page.$$eval(".eplister ul li", (el) => {
-      return el.map((eps) => {
-        const epTitle = eps.querySelector(".epl-title")?.textContent;
-        const epLang = eps.querySelector(".epl-sub")?.textContent;
-        const epRelease = eps.querySelector(".epl-date")?.textContent;
-        const epSlug = epTitle
-          ?.toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-+|-+$/g, "");
+    const epList = $(".eplister ul li")
+      .map((_, el) => {
+        const epTitle = $(el).find(".epl-title").text().trim();
+        const epLang = $(el).find(".epl-sub").text().trim();
+        const epRelease = $(el).find(".epl-date").text().trim();
+        const epSlug = createSlug(epTitle);
 
         return { epTitle, epLang, epRelease, epSlug };
-      });
-    });
+      })
+      .get();
 
+    // Kirim response
     res.json({
       success: true,
       data: {

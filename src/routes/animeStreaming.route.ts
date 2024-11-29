@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
-import puppeteer from "puppeteer";
+import axios from "axios";
+import * as cheerio from "cheerio";
 
 const router = Router();
 
@@ -9,24 +10,13 @@ router.get("/:slug", async (req: Request, res: Response) => {
 
     const url = `${process.env.ENDPOINT_ANIME}/${slug}`;
 
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
+    const { data } = await axios.get(url);
 
-    // Navigasi ke halaman target
-    await page.goto(url, { waitUntil: "networkidle2" });
+    const $ = cheerio.load(data);
 
-    await page.waitForSelector("iframe");
+    const videoSource = $("iframe").attr("src");
 
-    // Ambil atribut src dari iframe
-    const videoSource =
-      (await page.$eval("iframe", (iframe) => iframe.src)) ||
-      "Video source not found";
-
-    const title =
-      (await page.$eval(".entry-title", (el) => el.textContent)) ||
-      "Title not found";
-
-    await browser.close();
+    const title = $(".entry-title").text();
 
     // Kirim response
     res.json({
