@@ -17,7 +17,7 @@ router.get("/", async (req: Request, res: Response) => {
     const $ = cheerio.load(html);
 
     // Ambil elemen berdasarkan selector
-    const animes = $(".bs")
+    const animes = $(".listupd > .excstf > .bs")
       .map((_, element) => {
         const title = $(element)
           .find(".tt")
