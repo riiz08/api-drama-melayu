@@ -6,8 +6,7 @@ import latestRelease from "./routes/latestRelease.route";
 import animeDetail from "./routes/animeDetail.route";
 import cors from "cors";
 import filteringAnime from "./routes/filteringAnime.route";
-import mostPopularWeekly from "./routes/mostPopularWeekly.route";
-
+import mostPopular from "./routes/mostPopular.route";
 dotenv.config();
 
 const app: Application = express();
@@ -25,7 +24,7 @@ app.use("/api/v1/anime/latest-release", latestRelease);
 app.use("/api/v1/anime", search);
 app.use("/api/v1/anime/watch", animeStreaming);
 app.use("/api/v1/anime", animeDetail);
-app.use("/api/v1/anime/popular/weekly", mostPopularWeekly);
+app.use("/api/v1/anime/popular/alltime", mostPopular);
 
 // Start server
 app.listen(PORT, () => {

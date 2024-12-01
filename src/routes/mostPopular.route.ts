@@ -13,7 +13,7 @@ router.get("/", async (req: Request, res: Response) => {
     // Muat HTML ke dalam Cheerio
     const $ = cheerio.load(html);
 
-    const listAnime = $(".wpop-weekly ul li")
+    const listAnime = $(".wpop-alltime ul li")
       .map((_, el) => {
         const title = $(el).find("h4").text().trim();
         const genres = $(el)
@@ -22,8 +22,13 @@ router.get("/", async (req: Request, res: Response) => {
           .get();
         const thumbnailSrc = $(el).find(".imgseries > a > img").attr("src");
         const thumbnail = thumbnailSrc?.replace(/\?resize=\d+,\d+$/, "");
+        const slug = title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        const rating = $(el).find(".numscore").text().trim();
 
-        return { title, genres, thumbnail };
+        return { title, genres, thumbnail, slug, rating };
       })
       .get();
 
