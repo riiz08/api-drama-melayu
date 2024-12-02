@@ -7,6 +7,10 @@ import animeDetail from "./routes/animeDetail.route";
 import cors from "cors";
 import filteringAnime from "./routes/filteringAnime.route";
 import mostPopular from "./routes/mostPopular.route";
+import mangaMostPopularWeekly from "./routes/mangaMostPopularWeekly.route";
+import daftarKomik from "./routes/daftarKomik.route";
+import pustakaKomik from "./routes/pustakaKomik.route";
+
 dotenv.config();
 
 const app: Application = express();
@@ -25,6 +29,9 @@ app.use("/api/v1/anime", search);
 app.use("/api/v1/anime/watch", animeStreaming);
 app.use("/api/v1/anime", animeDetail);
 app.use("/api/v1/anime/popular/alltime", mostPopular);
+app.use("/api/v1/manga/popular/weekly", mangaMostPopularWeekly);
+app.use("/api/v1/daftar-komik", daftarKomik);
+app.use("/api/v1/pustaka", pustakaKomik);
 
 // Start server
 app.listen(PORT, () => {
