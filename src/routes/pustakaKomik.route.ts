@@ -12,7 +12,7 @@ router.get("/", async (req: Request, res: Response) => {
     const genre = req.query.genre;
     const genre2 = req.query.genre2;
     const status = req.query.status;
-    const url = `https://api.komiku.id/manga/?orderby=${order}&category_name=${category_name}&genre=${genre}&genre2=${genre2}&status=${status}`;
+    const url = `${process.env.ENDPOINT_PUSTAKA_KOMIK}manga/?orderby=${order}&category_name=${category_name}&genre=${genre}&genre2=${genre2}&status=${status}`;
 
     // Ambil HTML menggunakan Axios
     const { data: html } = await axios.get(url);
