@@ -10,6 +10,9 @@ import mostPopular from "./routes/mostPopular.route";
 import mangaMostPopularWeekly from "./routes/mangaMostPopularWeekly.route";
 import daftarKomik from "./routes/daftarKomik.route";
 import pustakaKomik from "./routes/pustakaKomik.route";
+import manhwaPopularToday from "./routes/manhwaPopularToday.route";
+import manhuaPopularToday from "./routes/manhuaPopularToday.route";
+import komikTerbaru from "./routes/komikTerbaru.route";
 
 dotenv.config();
 
@@ -32,6 +35,9 @@ app.use("/api/v1/anime/popular/alltime", mostPopular);
 app.use("/api/v1/manga/popular/weekly", mangaMostPopularWeekly);
 app.use("/api/v1/daftar-komik", daftarKomik);
 app.use("/api/v1/pustaka", pustakaKomik);
+app.use("/api/v1/manhwa/popular/today", manhwaPopularToday);
+app.use("/api/v1/manhua/popular/today", manhuaPopularToday);
+app.use("/api/v1/komik/terbaru", komikTerbaru);
 
 // Start server
 app.listen(PORT, () => {
