@@ -3,6 +3,7 @@ import express, { Application, response } from "express";
 import dramaLatestRelease from "./routes/dramaLatestRelease";
 import getAllDrama from "./routes/getAllDrama";
 import detailEpisode from "./routes/detailEpisode";
+import search from "./routes/search";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use("/api/v1/drama-terbaru", dramaLatestRelease);
 app.use("/api/v1/drama", getAllDrama);
 app.use("/api/v1/watch", detailEpisode);
+app.use("/api/v1/search", search);
 
 // Start server
 app.listen(PORT, () => {

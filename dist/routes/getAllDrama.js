@@ -33,7 +33,7 @@ const createSlug_1 = require("../libs/createSlug");
 const router = (0, express_1.Router)();
 router.get("/", async (req, res) => {
     try {
-        const url = `${process.env.ENDPOINT}/search/label/sekarang`;
+        const url = `${process.env.ENDPOINT}/search/label/drama`;
         // Launch browser
         const browser = await puppeteer_1.default.launch({
             headless: true, // bisa juga true

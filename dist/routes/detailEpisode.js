@@ -29,40 +29,42 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const cheerio = __importStar(require("cheerio"));
 const puppeteer_1 = __importDefault(require("puppeteer"));
-const createSlug_1 = require("../libs/createSlug");
 const router = (0, express_1.Router)();
-router.get("/", async (req, res) => {
+router.get("/*", async (req, res) => {
     try {
-        const url = `${process.env.ENDPOINT}/search/label/sekarang`;
-        // Launch browser
+        const slug = req.params[0];
+        const url = `${process.env.ENDPOINT}/${slug}.html`;
         const browser = await puppeteer_1.default.launch({
-            headless: true, // bisa juga true
+            headless: true,
             args: ["--no-sandbox", "--disable-setuid-sandbox"],
         });
         const page = await browser.newPage();
-        // Set User-Agent biar tidak dianggap bot
+        // Pasang User-Agent agar tidak ditolak
         await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
+        const videoUrls = [];
+        // Intercept response untuk mendeteksi file video
+        await page.setRequestInterception(true);
+        page.on("request", (request) => request.continue());
+        page.on("response", async (response) => {
+            const responseUrl = response.url();
+            // Cek apakah file master.m3u8
+            if (responseUrl.includes("master.m3u8") &&
+                !videoUrls.includes(responseUrl)) {
+                videoUrls.push(responseUrl);
+            }
+        });
         await page.goto(url, { waitUntil: "networkidle2", timeout: 0 });
+        await new Promise((resolve) => setTimeout(resolve, 3000));
         const html = await page.content();
         await browser.close();
-        // Load ke cheerio
         const $ = cheerio.load(html);
-        const dramas = $("article")
-            .map((_, element) => {
-            const title = $(element)
-                .find(".entry-title a")
-                .text()
-                .replace(/[\t\n]+/g, "")
-                .trim();
-            const thumb = $(element).find(".entry-image").attr("data-image");
-            const date = $(element).find(".entry-time time").text().trim();
-            const slug = (0, createSlug_1.createSlug)(title);
-            return { title, thumb, date, slug };
-        })
-            .get();
+        const title = $(".entry-title").first().text().trim();
+        const thumb = $(".entry-content").find("img").attr("src");
         res.json({
             success: true,
-            data: dramas,
+            title,
+            thumb,
+            videoSources: videoUrls, // hanya yang master.m3u8
         });
     }
     catch (error) {
