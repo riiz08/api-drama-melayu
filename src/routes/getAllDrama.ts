@@ -7,7 +7,7 @@ const router = Router();
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const url = `${process.env.ENDPOINT}/search/label/sekarang`;
+    const url = `${process.env.ENDPOINT}/search/label/drama`;
 
     // Launch browser
     const browser = await puppeteer.launch({
