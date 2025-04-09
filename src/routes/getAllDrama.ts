@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import * as cheerio from "cheerio";
 import puppeteer from "puppeteer";
 import { createSlug } from "../libs/createSlug";
+import { resizeImageUrl } from "../utils/image";
 
 const router = Router();
 
@@ -38,7 +39,7 @@ router.get("/", async (req: Request, res: Response) => {
 
         const rawThumb =
           $(element).find(".entry-image").attr("data-image") ?? "";
-        const thumb = rawThumb.replace(/w\d+-h\d+/, "w640");
+        const thumb = resizeImageUrl(rawThumb);
 
         const date = $(element).find(".entry-time time").text().trim();
 

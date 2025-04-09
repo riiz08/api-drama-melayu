@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import * as cheerio from "cheerio";
 import puppeteer from "puppeteer";
+import { resizeImageUrl } from "../utils/image";
 
 const router = Router();
 
@@ -46,7 +47,7 @@ router.get("/*", async (req: Request, res: Response) => {
     const title = $(".entry-title").first().text().trim();
 
     const rawThumb = $(".entry-content").find("img").attr("src") ?? "";
-    const thumb = rawThumb.replace(/w\d+-h\d+/, "w640");
+    const thumb = resizeImageUrl(rawThumb);
 
     res.json({
       success: true,
