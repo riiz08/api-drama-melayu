@@ -9,15 +9,13 @@ router.get("/", async (req: Request, res: Response) => {
   try {
     const url = `${process.env.ENDPOINT}/search/label/sekarang`;
 
-    // Launch browser
     const browser = await puppeteer.launch({
-      headless: true, // bisa juga true
+      headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     const page = await browser.newPage();
 
-    // Set User-Agent biar tidak dianggap bot
     await page.setUserAgent(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
     );
@@ -28,7 +26,6 @@ router.get("/", async (req: Request, res: Response) => {
 
     await browser.close();
 
-    // Load ke cheerio
     const $ = cheerio.load(html);
 
     const dramas = $("article")
@@ -39,7 +36,9 @@ router.get("/", async (req: Request, res: Response) => {
           .replace(/[\t\n]+/g, "")
           .trim();
 
-        const thumb = $(element).find(".entry-image").attr("data-image");
+        const rawThumb =
+          $(element).find(".entry-image").attr("data-image") ?? "";
+        const thumb = rawThumb.replace(/w\d+-h\d+/, "w640");
 
         const date = $(element).find(".entry-time time").text().trim();
 
