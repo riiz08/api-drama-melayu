@@ -15,13 +15,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -29,6 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const cheerio = __importStar(require("cheerio"));
 const puppeteer_1 = __importDefault(require("puppeteer"));
+const image_1 = require("../utils/image");
 const router = (0, express_1.Router)();
 router.get("/*", async (req, res) => {
     try {
@@ -39,15 +50,12 @@ router.get("/*", async (req, res) => {
             args: ["--no-sandbox", "--disable-setuid-sandbox"],
         });
         const page = await browser.newPage();
-        // Pasang User-Agent agar tidak ditolak
         await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
         const videoUrls = [];
-        // Intercept response untuk mendeteksi file video
         await page.setRequestInterception(true);
         page.on("request", (request) => request.continue());
         page.on("response", async (response) => {
             const responseUrl = response.url();
-            // Cek apakah file master.m3u8
             if (responseUrl.includes("master.m3u8") &&
                 !videoUrls.includes(responseUrl)) {
                 videoUrls.push(responseUrl);
@@ -59,12 +67,13 @@ router.get("/*", async (req, res) => {
         await browser.close();
         const $ = cheerio.load(html);
         const title = $(".entry-title").first().text().trim();
-        const thumb = $(".entry-content").find("img").attr("src");
+        const rawThumb = $(".entry-content").find("img").attr("src") ?? "";
+        const thumb = (0, image_1.resizeImageUrl)(rawThumb);
         res.json({
             success: true,
             title,
             thumb,
-            videoSources: videoUrls, // hanya yang master.m3u8
+            videoSources: videoUrls,
         });
     }
     catch (error) {
