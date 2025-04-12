@@ -1,9 +1,9 @@
 import cors from "cors";
-import express, { Application, response } from "express";
-import dramaLatestRelease from "./routes/dramaLatestRelease";
-import getAllDrama from "./routes/getAllDrama";
-import detailEpisode from "./routes/detailEpisode";
-import search from "./routes/search";
+import express, { Application } from "express";
+import dramaLatestUpdate from "./routes/dramaLatestUpdate";
+import dramaStreaming from "./routes/dramaStreaming";
+import dramaDetail from "./routes/dramaDetail";
+import dramaSearch from "./routes/dramaSearch";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -18,10 +18,10 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 // Routes
-app.use("/api/v1/drama-terbaru", dramaLatestRelease);
-app.use("/api/v1/drama", getAllDrama);
-app.use("/api/v1/watch", detailEpisode);
-app.use("/api/v1/search", search);
+app.use("/api/v1/latest-update", dramaLatestUpdate);
+app.use("/api/v1/watch", dramaStreaming);
+app.use("/api/v1/title", dramaDetail);
+app.use("/api/v1/", dramaSearch);
 
 // Start server
 app.listen(PORT, () => {
