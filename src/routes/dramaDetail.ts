@@ -9,7 +9,7 @@ const router = Router();
 router.get("/:slug", async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;
-    const url = `https://basahjeruk.org/category/${slug}`;
+    const url = `${process.env.ENDPOINT}/category/${slug}`;
     const { data: html } = await axios.get(url);
 
     const $ = cheerio.load(html);

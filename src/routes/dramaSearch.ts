@@ -10,7 +10,7 @@ router.get("/", async (req: Request, res: Response) => {
   try {
     const { search } = req.query;
 
-    const url = `https://basahjeruk.org/?s=${search}`;
+    const url = `${process.env.ENDPOINT}/?s=${search}`;
 
     const { data: html } = await axios.get(url);
 
