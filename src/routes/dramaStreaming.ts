@@ -34,6 +34,15 @@ router.get("/:slug", async (req: Request, res: Response) => {
       })
       .get();
 
+    const recentPost = $("#recent-posts-5 ul li")
+      .map((_, recent) => {
+        const title = $(recent).find("a").text().trim();
+        const slug = createSlug(title);
+
+        return { title, slug };
+      })
+      .get();
+
     res.json({
       success: true,
       data: {
@@ -42,6 +51,7 @@ router.get("/:slug", async (req: Request, res: Response) => {
         video,
         slug: fullTitleSlug,
         relatedEpisodes,
+        recentPost,
       },
     });
   } catch (error) {

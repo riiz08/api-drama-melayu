@@ -34,12 +34,22 @@ router.get("/", async (req: Request, res: Response) => {
       })
       .get();
 
+    const recentPost = $("#recent-posts-5 ul li")
+      .map((_, recent) => {
+        const title = $(recent).find("a").text().trim();
+        const slug = createSlug(title);
+
+        return { title, slug };
+      })
+      .get();
+
     const currentPage = $(".pagination").find(".current").text().trim();
 
     res.json({
       success: true,
       currentPage: current,
       totalPages: total,
+      recentPost,
       data: dramas,
     });
   } catch (error) {

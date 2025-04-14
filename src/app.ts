@@ -22,7 +22,7 @@ app.use(express.json());
 app.use("/", home);
 app.use("/api/v1/latest-update", dramaLatestUpdate);
 app.use("/api/v1/watch", dramaStreaming);
-app.use("/api/v1/title", dramaDetail);
+app.use("/api/v1/category", dramaDetail);
 app.use("/api/v1/", dramaSearch);
 
 // Start server
