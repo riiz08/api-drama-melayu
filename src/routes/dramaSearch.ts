@@ -9,8 +9,9 @@ const router = Router();
 router.get("/", async (req: Request, res: Response) => {
   try {
     const { search } = req.query;
+    const { page } = req.query || 1;
 
-    const url = `${process.env.ENDPOINT}/?s=${search}`;
+    const url = `${process.env.ENDPOINT}/page/${page}/?s=${search}`;
 
     const { data: html } = await axios.get(url);
 
