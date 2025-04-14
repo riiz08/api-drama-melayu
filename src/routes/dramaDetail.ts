@@ -45,8 +45,10 @@ router.get("/:slug", async (req: Request, res: Response) => {
       success: true,
       currentPage: current,
       totalPages: total,
-      data: dramas,
-      recentPost,
+      data: {
+        dramas,
+        recentPost,
+      },
     });
   } catch (error) {
     console.error("Scraping Error:", error);
