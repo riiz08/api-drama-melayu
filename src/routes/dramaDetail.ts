@@ -32,7 +32,7 @@ router.get("/:slug", async (req: Request, res: Response) => {
       })
       .get();
 
-    const recentPost = $("#recent-posts-5 ul li")
+    const recentPosts = $("#recent-posts-5 ul li")
       .map((_, recent) => {
         const title = $(recent).find("a").text().trim();
         const slug = createSlug(title);
@@ -45,10 +45,8 @@ router.get("/:slug", async (req: Request, res: Response) => {
       success: true,
       currentPage: current,
       totalPages: total,
-      data: {
-        dramas,
-        recentPost,
-      },
+      data: dramas,
+      recentPosts,
     });
   } catch (error) {
     console.error("Scraping Error:", error);
