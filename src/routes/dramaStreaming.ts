@@ -1,3 +1,4 @@
+import { createSlug } from "./../libs/createSlug";
 import { Router, Request, Response } from "express";
 import axios from "axios";
 import * as cheerio from "cheerio";
@@ -65,6 +66,19 @@ router.get("/:slug", async (req: Request, res: Response) => {
       })
       .get();
 
+    const relatedDramas = $("#related_posts")
+      .find(".related-item")
+      .map((_, relate) => {
+        const title = $(relate).find("h3 a").text().trim();
+        const rawThumbnail =
+          $(relate).find(".post-thumbnail a img").attr("src") || "";
+        const thumbnail = rawThumbnail.replace(/-\d+x\d+(?=\.\w+$)/, "");
+        const slug = createSlug(title);
+
+        return { title, thumbnail };
+      })
+      .get();
+
     res.json({
       success: true,
       data: {
@@ -81,6 +95,7 @@ router.get("/:slug", async (req: Request, res: Response) => {
         dramaTitle,
         dramaSlug,
       },
+      relate: relatedDramas,
       trending: trendingDramas,
     });
   } catch (error) {
