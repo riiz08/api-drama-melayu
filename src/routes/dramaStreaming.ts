@@ -1,8 +1,6 @@
 import { Router, Request, Response } from "express";
-import * as cheerio from "cheerio";
-import { createSlug } from "../libs/createSlug";
-import { cleanThumbnailUrl } from "../utils/image";
 import axios from "axios";
+import * as cheerio from "cheerio";
 
 const router = Router();
 
@@ -14,30 +12,54 @@ router.get("/:slug", async (req: Request, res: Response) => {
 
     const $ = cheerio.load(html);
 
-    const elem = $("article");
+    const title = $("h1.name.post-title span").text().trim();
+    const video = $("div.single-post-video iframe").attr("src") || "";
 
-    const title = $("#crumbs").children("a").eq(1).text().trim();
-    const episodeTitle = elem.find("h1").text().trim();
-    const video = elem.find("iframe").attr("src");
-    const fullTitleSlug = createSlug(title);
-    const relatedEpisodes = $("#related_posts")
-      .find(".related-item")
-      .map((_, re) => {
-        const title = $(re).find("h3 a").text().trim();
-        const rawThumbnail =
-          $(re).find(".post-thumbnail a img").attr("src") || "";
-        const thumbnail = cleanThumbnailUrl(rawThumbnail);
-        const date = $(re).find(".tie-date").text();
-        const slug = createSlug(title);
+    const episode = $("div.entry")
+      .find("div:contains('Episod:')")
+      .text()
+      .replace("Episod:", "")
+      .trim();
+    const airDate = $("div.entry")
+      .find("div:contains('Tarikh Tayangan:')")
+      .text()
+      .replace("Tarikh Tayangan:", "")
+      .trim();
+    const schedule = $("div.entry")
+      .find("div:contains('Waktu Siaran:')")
+      .text()
+      .replace("Waktu Siaran:", "")
+      .trim();
+    const director = $("div.entry")
+      .find("div:contains('Pengarah:')")
+      .text()
+      .replace("Pengarah:", "")
+      .trim();
+    const production = $("div.entry")
+      .find("div:contains('Produksi:')")
+      .text()
+      .replace("Produksi:", "")
+      .trim();
 
-        return { title, thumbnail, date, slug };
-      })
-      .get();
+    const uploadDate = $("meta[itemprop='uploadDate']").attr("content") || "";
+    const duration = $("meta[itemprop='duration']").attr("content") || "";
+    const thumbnailUrl =
+      $("meta[itemprop='thumbnailUrl']").attr("content") || "";
+    // Ambil link anchor (judul utama drama)
+    const anchorEl = $("div.entry").find("a[href*='drama-dia-imamku']");
+    const dramaTitle = anchorEl.first().text().trim();
+    const dramaUrl = anchorEl.first().attr("href") || "";
+    const dramaSlug = dramaUrl
+      .replace(/^https:\/\/kepalabergetar\.cfd\//, "")
+      .replace(/\/$/, "");
 
-    const recentPosts = $("#recent-posts-5 ul li")
-      .map((_, recent) => {
-        const title = $(recent).find("a").text().trim();
-        const slug = createSlug(title);
+    const trendingDramas = $(".widget-container .textwidget ol li")
+      .map((_, el) => {
+        const title = $(el).find("a").text().trim();
+        const href = $(el).find("a").attr("href") || "";
+        const slug = href
+          .replace(/^https:\/\/kepalabergetar\.cfd\//, "")
+          .replace(/\/$/, ""); // hapus trailing slash
 
         return { title, slug };
       })
@@ -47,18 +69,25 @@ router.get("/:slug", async (req: Request, res: Response) => {
       success: true,
       data: {
         title,
-        episodeTitle,
         video,
-        slug: fullTitleSlug,
+        episode,
+        airDate,
+        schedule,
+        director,
+        production,
+        uploadDate,
+        duration,
+        thumbnailUrl,
+        dramaTitle,
+        dramaSlug,
       },
-      relatedEpisodes,
-      recentPosts,
+      trending: trendingDramas,
     });
   } catch (error) {
     console.error("Scraping Error:", error);
     res.status(500).json({
       success: false,
-      message: "Error while scraping data",
+      message: "Failed to scrape episode detail.",
     });
   }
 });

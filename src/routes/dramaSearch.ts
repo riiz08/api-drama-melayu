@@ -28,30 +28,32 @@ router.get("/", async (req: Request, res: Response) => {
         const title = $(elem).find(".post-box-title a").text().trim();
         const rawThumbnail =
           $(elem).find(".post-thumbnail img").attr("src") || "";
-        const thumbnail = cleanThumbnailUrl(rawThumbnail);
+        const thumbnail = rawThumbnail.replace(/-\d+x\d+(?=\.\w+$)/, "");
         const slug = createSlug(title);
 
         return { title, thumbnail, slug };
       })
       .get();
 
-    const recentPosts = $("#recent-posts-5 ul li")
-      .map((_, recent) => {
-        const title = $(recent).find("a").text().trim();
-        const slug = createSlug(title);
-
+    const trending = $(".widget-container .textwidget ol li a")
+      .map((_, el) => {
+        const title = $(el).text().trim();
+        const href = $(el).attr("href") || "";
+        const slug = href
+          .replace(/^https:\/\/kepalabergetar\.cfd\//, "")
+          .replace(/\/$/, ""); // hapus domain & trailing slash
         return { title, slug };
       })
       .get();
 
-    const currentPage = $(".pagination").find(".current").text().trim();
-
     res.json({
       success: true,
-      currentPage: current,
-      totalPages: total,
-      data: dramas,
-      recentPosts,
+      data: {
+        currentPage: current,
+        totalPages: total,
+        drama: dramas,
+      },
+      trending,
     });
   } catch (error) {
     console.error("Scraping Error:", error);
