@@ -33,7 +33,8 @@ router.get("/*", async (req: Request, res: Response) => {
 
       if (
         resUrl.includes(".m3u8") ||
-        contentType.includes("application/vnd.apple.mpegurl")
+        contentType.includes("application/vnd.apple.mpegurl") ||
+        (resUrl.includes("filemoon.to") && contentType.includes("text/html"))
       ) {
         if (!videoUrls.includes(resUrl)) {
           videoUrls.push(resUrl);

@@ -6,6 +6,7 @@ import allDrama from "./routes/allDrama";
 import allKomedi from "./routes/allKomedi";
 import dramaSearch from "./routes/dramaSearch";
 import home from "./routes/home";
+import proxyRouter from "./routes/proxy";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -26,6 +27,7 @@ app.use("/api/v1/watch", dramaStreaming);
 app.use("/api/v1/drama", allDrama);
 app.use("/api/v1/komedi", allKomedi);
 app.use("/api/v1/", dramaSearch);
+app.use("/api/v1", proxyRouter);
 
 // Start server
 app.listen(PORT, () => {

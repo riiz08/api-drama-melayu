@@ -11,6 +11,7 @@ const allDrama_1 = __importDefault(require("./routes/allDrama"));
 const allKomedi_1 = __importDefault(require("./routes/allKomedi"));
 const dramaSearch_1 = __importDefault(require("./routes/dramaSearch"));
 const home_1 = __importDefault(require("./routes/home"));
+const proxy_1 = __importDefault(require("./routes/proxy"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -25,6 +26,7 @@ app.use("/api/v1/watch", dramaStreaming_1.default);
 app.use("/api/v1/drama", allDrama_1.default);
 app.use("/api/v1/komedi", allKomedi_1.default);
 app.use("/api/v1/", dramaSearch_1.default);
+app.use("/api/v1", proxy_1.default);
 // Start server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
