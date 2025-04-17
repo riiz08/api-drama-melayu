@@ -26,7 +26,7 @@ app.use("/api/v1/watch", dramaStreaming_1.default);
 app.use("/api/v1/drama", allDrama_1.default);
 app.use("/api/v1/komedi", allKomedi_1.default);
 app.use("/api/v1/", dramaSearch_1.default);
-app.use("/api/v1", proxy_1.default);
+app.use("/api/v1/proxy", proxy_1.default);
 // Start server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

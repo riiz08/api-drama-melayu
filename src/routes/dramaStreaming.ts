@@ -5,11 +5,11 @@ import { resizeImageUrl } from "../utils/image";
 
 const router = Router();
 
-router.get("/*", async (req: Request, res: Response) => {
+router.get("/:year/:month/:slug", async (req: Request, res: Response) => {
   try {
-    const slug = req.params[0];
-    const url = `${process.env.ENDPOINT}/${slug}.html
-`;
+    const { year, month, slug } = req.params;
+    const fullSlug = `${year}/${month}/${slug}`;
+    const url = `${process.env.ENDPOINT}/${fullSlug}.html`;
 
     const browser = await puppeteer.launch({
       headless: true,

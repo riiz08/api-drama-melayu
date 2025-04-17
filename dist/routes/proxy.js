@@ -7,7 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const axios_1 = __importDefault(require("axios"));
 const router = (0, express_1.Router)();
-router.get("/proxy", async (req, res) => {
+router.get("/", async (req, res) => {
     const targetUrl = req.query.url;
     if (!targetUrl) {
         return;

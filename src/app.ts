@@ -27,7 +27,7 @@ app.use("/api/v1/watch", dramaStreaming);
 app.use("/api/v1/drama", allDrama);
 app.use("/api/v1/komedi", allKomedi);
 app.use("/api/v1/", dramaSearch);
-app.use("/api/v1", proxyRouter);
+app.use("/api/v1/proxy", proxyRouter);
 
 // Start server
 app.listen(PORT, () => {

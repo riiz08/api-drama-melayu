@@ -4,7 +4,7 @@ import axios from "axios";
 
 const router = Router();
 
-router.get("/proxy", async (req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
   const targetUrl = req.query.url as string;
   if (!targetUrl) {
     return;

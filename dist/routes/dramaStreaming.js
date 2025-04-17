@@ -41,11 +41,11 @@ const cheerio = __importStar(require("cheerio"));
 const puppeteer_1 = __importDefault(require("puppeteer"));
 const image_1 = require("../utils/image");
 const router = (0, express_1.Router)();
-router.get("/*", async (req, res) => {
+router.get("/:year/:month/:slug", async (req, res) => {
     try {
-        const slug = req.params[0];
-        const url = `${process.env.ENDPOINT}/${slug}.html
-`;
+        const { year, month, slug } = req.params;
+        const fullSlug = `${year}/${month}/${slug}`;
+        const url = `${process.env.ENDPOINT}/${fullSlug}.html`;
         const browser = await puppeteer_1.default.launch({
             headless: true,
             args: ["--no-sandbox", "--disable-setuid-sandbox"],
