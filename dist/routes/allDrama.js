@@ -38,29 +38,44 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const cheerio = __importStar(require("cheerio"));
+const puppeteer_1 = __importDefault(require("puppeteer"));
 const image_1 = require("../utils/image");
-const axios_1 = __importDefault(require("axios"));
-const createSlug_1 = require("../libs/createSlug");
 const router = (0, express_1.Router)();
-router.get("/:slug", async (req, res) => {
+router.get("/", async (req, res) => {
     try {
-        const { slug } = req.params;
-        const url = `${process.env.ENDPOINT}/${slug}`;
-        const { data: html } = await axios_1.default.get(url);
+        const url = `${process.env.ENDPOINT}/search/label/drama`;
+        const browser = await puppeteer_1.default.launch({
+            headless: true,
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        });
+        const page = await browser.newPage();
+        // User-Agent untuk hindari deteksi bot
+        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
+        await page.goto(url, { waitUntil: "networkidle2", timeout: 0 });
+        const html = await page.content();
+        await browser.close();
         const $ = cheerio.load(html);
-        const dramas = $(".cat-box-content")
-            .find("ul li")
-            .map((_, drama) => {
-            const title = $(drama).find("h2.post-box-title a").text().trim();
-            const rawThumbnail = $(drama).find(".post-thumbnail a img").attr("src") || "";
-            const thumbnail = (0, image_1.cleanThumbnailUrl)(rawThumbnail);
-            const slug = (0, createSlug_1.createSlug)(title);
-            return { title, thumbnail, slug };
+        const dramas = $("article")
+            .map((_, elem) => {
+            const title = $(elem)
+                .find(".entry-header .entry-title a")
+                .text()
+                .trim();
+            const rawThumbnail = $(elem).find(".entry-image").attr("data-image") || "";
+            const thumbnail = (0, image_1.resizeImageUrl)(rawThumbnail);
+            const rawSlug = $(elem).find(".entry-image-wrap").attr("href") || "";
+            const slug = rawSlug
+                .replace("https://blog.basahjeruk.info/", "")
+                .replace(".html", "");
+            const dateTime = $(elem).find(".entry-time time").attr("datetime");
+            return { title, thumbnail, slug, dateTime };
         })
             .get();
         res.json({
             success: true,
-            data: dramas,
+            data: {
+                drama: dramas,
+            },
         });
     }
     catch (error) {

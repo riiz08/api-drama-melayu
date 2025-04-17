@@ -38,13 +38,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const cheerio = __importStar(require("cheerio"));
-const createSlug_1 = require("../libs/createSlug");
 const puppeteer_1 = __importDefault(require("puppeteer"));
+const image_1 = require("../utils/image");
 const router = (0, express_1.Router)();
 router.get("/", async (req, res) => {
     try {
-        const pageParam = req.query.page || 1;
-        const url = `${process.env.ENDPOINT}/page/${pageParam}`;
+        const url = `${process.env.ENDPOINT}/search/label/sekarang`;
         const browser = await puppeteer_1.default.launch({
             headless: true,
             args: ["--no-sandbox", "--disable-setuid-sandbox"],
@@ -56,37 +55,27 @@ router.get("/", async (req, res) => {
         const html = await page.content();
         await browser.close();
         const $ = cheerio.load(html);
-        const dramas = $(".recent-box")
-            .find(".recent-item")
+        const dramas = $("article")
             .map((_, elem) => {
-            const title = $(elem).find(".post-box-title a").text().trim();
-            const rawThumbnail = $(elem).find(".post-thumbnail img").attr("src") || "";
-            const thumbnail = rawThumbnail.replace(/-\d+x\d+(?=\.\w+$)/, ""); // ubah ke full image
-            const slug = (0, createSlug_1.createSlug)(title);
-            return { title, thumbnail, slug };
+            const title = $(elem)
+                .find(".entry-header .entry-title a")
+                .text()
+                .trim();
+            const rawThumbnail = $(elem).find(".entry-image").attr("data-image") || "";
+            const thumbnail = (0, image_1.resizeImageUrl)(rawThumbnail);
+            const rawSlug = $(elem).find(".entry-image-wrap").attr("href") || "";
+            const slug = rawSlug
+                .replace("https://blog.basahjeruk.info/", "")
+                .replace(".html", "");
+            const dateTime = $(elem).find(".entry-time time").attr("datetime");
+            return { title, thumbnail, slug, dateTime };
         })
             .get();
-        const trending = $(".widget-container .textwidget ol li a")
-            .map((_, el) => {
-            const title = $(el).text().trim();
-            const href = $(el).attr("href") || "";
-            const slug = href
-                .replace(/^https:\/\/kepalabergetar\.cfd\//, "")
-                .replace(/\/$/, ""); // hapus domain & trailing slash
-            return { title, slug };
-        })
-            .get();
-        const currentPage = parseInt($(".pagination .current").text().trim()) || 1;
-        const lastHref = $(".pagination a.last").attr("href") || "";
-        const lastPage = parseInt(lastHref.match(/\/page\/(\d+)\//)?.[1] || "1");
         res.json({
             success: true,
             data: {
-                currentPage: currentPage,
-                totalPage: lastPage,
                 drama: dramas,
             },
-            trending: trending,
         });
     }
     catch (error) {

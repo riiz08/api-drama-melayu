@@ -2,7 +2,8 @@ import cors from "cors";
 import express, { Application } from "express";
 import dramaLatestUpdate from "./routes/dramaLatestUpdate";
 import dramaStreaming from "./routes/dramaStreaming";
-import dramaDetail from "./routes/dramaDetail";
+import allDrama from "./routes/allDrama";
+import allKomedi from "./routes/allKomedi";
 import dramaSearch from "./routes/dramaSearch";
 import home from "./routes/home";
 import dotenv from "dotenv";
@@ -22,7 +23,8 @@ app.use(express.json());
 app.use("/", home);
 app.use("/api/v1/latest-update", dramaLatestUpdate);
 app.use("/api/v1/watch", dramaStreaming);
-app.use("/api/v1/category", dramaDetail);
+app.use("/api/v1/drama", allDrama);
+app.use("/api/v1/komedi", allKomedi);
 app.use("/api/v1/", dramaSearch);
 
 // Start server

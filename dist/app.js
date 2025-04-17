@@ -7,7 +7,8 @@ const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
 const dramaLatestUpdate_1 = __importDefault(require("./routes/dramaLatestUpdate"));
 const dramaStreaming_1 = __importDefault(require("./routes/dramaStreaming"));
-const dramaDetail_1 = __importDefault(require("./routes/dramaDetail"));
+const allDrama_1 = __importDefault(require("./routes/allDrama"));
+const allKomedi_1 = __importDefault(require("./routes/allKomedi"));
 const dramaSearch_1 = __importDefault(require("./routes/dramaSearch"));
 const home_1 = __importDefault(require("./routes/home"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -21,7 +22,8 @@ app.use(express_1.default.json());
 app.use("/", home_1.default);
 app.use("/api/v1/latest-update", dramaLatestUpdate_1.default);
 app.use("/api/v1/watch", dramaStreaming_1.default);
-app.use("/api/v1/category", dramaDetail_1.default);
+app.use("/api/v1/drama", allDrama_1.default);
+app.use("/api/v1/komedi", allKomedi_1.default);
 app.use("/api/v1/", dramaSearch_1.default);
 // Start server
 app.listen(PORT, () => {

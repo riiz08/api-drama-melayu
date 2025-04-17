@@ -1,6 +1,5 @@
 import { Router, Request, Response } from "express";
 import * as cheerio from "cheerio";
-import { createSlug } from "../libs/createSlug";
 import puppeteer from "puppeteer";
 import { resizeImageUrl } from "../utils/image";
 
@@ -8,7 +7,7 @@ const router = Router();
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const url = `${process.env.ENDPOINT}/search/label/sekarang`;
+    const url = `${process.env.ENDPOINT}/search/label/Komedi`;
 
     const browser = await puppeteer.launch({
       headless: true,

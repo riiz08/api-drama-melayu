@@ -1,108 +1,138 @@
-import { createSlug } from "./../libs/createSlug";
 import { Router, Request, Response } from "express";
-import axios from "axios";
 import * as cheerio from "cheerio";
+import puppeteer from "puppeteer";
+import { resizeImageUrl } from "../utils/image";
 
 const router = Router();
 
-router.get("/:slug", async (req: Request, res: Response) => {
+router.get("/*", async (req: Request, res: Response) => {
   try {
-    const { slug } = req.params;
-    const url = `${process.env.ENDPOINT}/${slug}`;
-    const { data: html } = await axios.get(url);
+    const slug = req.params[0];
+    const url = `${process.env.ENDPOINT}/${slug}.html
+`;
+
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+
+    const page = await browser.newPage();
+
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    );
+
+    const videoUrls: string[] = [];
+
+    await page.setRequestInterception(true);
+    page.on("request", (req) => req.continue());
+
+    page.on("response", async (response) => {
+      const resUrl = response.url();
+      const contentType = response.headers()["content-type"] || "";
+
+      if (
+        resUrl.includes(".m3u8") ||
+        contentType.includes("application/vnd.apple.mpegurl")
+      ) {
+        if (!videoUrls.includes(resUrl)) {
+          videoUrls.push(resUrl);
+        }
+      }
+    });
+
+    await page.goto(url, { waitUntil: "networkidle2", timeout: 0 });
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+
+    const html = await page.content();
+    await browser.close();
 
     const $ = cheerio.load(html);
 
-    const title = $("h1.name.post-title span").text().trim();
-    const video = $("div.single-post-video iframe").attr("src") || "";
-
-    const episode = $("div.entry")
-      .find("div:contains('Episod:')")
+    const episodeTitle = $("article").find(".entry-title").text().trim();
+    const dateTime = $(".entry-time").find("time").attr("datetime");
+    const paragraph = $(
+      "div[style*='box-sizing: border-box'][style*='font-size: 17px']"
+    )
+      .first()
+      .text()
+      .trim();
+    const title = $("h2").first().text().trim();
+    const episod = $("b:contains('Episod:')")
+      .parent()
       .text()
       .replace("Episod:", "")
       .trim();
-    const airDate = $("div.entry")
-      .find("div:contains('Tarikh Tayangan:')")
+    const tarikhTayangan = $("b:contains('Tarikh Tayangan:')")
+      .parent()
       .text()
       .replace("Tarikh Tayangan:", "")
       .trim();
-    const schedule = $("div.entry")
-      .find("div:contains('Waktu Siaran:')")
+    const waktuSiaran = $("b:contains('Waktu Siaran:')")
+      .parent()
       .text()
       .replace("Waktu Siaran:", "")
       .trim();
-    const director = $("div.entry")
-      .find("div:contains('Pengarah:')")
+    const rangkaian = $("b:contains('Rangkaian:')")
+      .parent()
+      .text()
+      .replace("Rangkaian:", "")
+      .trim();
+    const pengarah = $("b:contains('Pengarah:')")
+      .parent()
       .text()
       .replace("Pengarah:", "")
       .trim();
-    const production = $("div.entry")
-      .find("div:contains('Produksi:')")
+    const produksi = $("b:contains('Produksi:')")
+      .parent()
       .text()
       .replace("Produksi:", "")
       .trim();
+    const rawThumbnail = $(".entry-content-wrap").find("img").attr("src") || "";
+    const thumbnail = resizeImageUrl(rawThumbnail);
 
-    const uploadDate = $("meta[itemprop='uploadDate']").attr("content") || "";
-    const duration = $("meta[itemprop='duration']").attr("content") || "";
-    const thumbnailUrl =
-      $("meta[itemprop='thumbnailUrl']").attr("content") || "";
-    // Ambil link anchor (judul utama drama)
-    const anchorEl = $("div.entry").find("a[href*='drama-dia-imamku']");
-    const dramaTitle = anchorEl.first().text().trim();
-    const dramaUrl = anchorEl.first().attr("href") || "";
-    const dramaSlug = dramaUrl
-      .replace(/^https:\/\/kepalabergetar\.cfd\//, "")
-      .replace(/\/$/, "");
-
-    const trendingDramas = $(".widget-container .textwidget ol li")
-      .map((_, el) => {
-        const title = $(el).find("a").text().trim();
-        const href = $(el).find("a").attr("href") || "";
-        const slug = href
-          .replace(/^https:\/\/kepalabergetar\.cfd\//, "")
-          .replace(/\/$/, ""); // hapus trailing slash
-
-        return { title, slug };
-      })
-      .get();
-
-    const relatedDramas = $("#related_posts")
-      .find(".related-item")
-      .map((_, relate) => {
-        const title = $(relate).find("h3 a").text().trim();
+    const trendings = $(".PopularPosts")
+      .find(".side-item")
+      .map((_, trending) => {
+        const title = $(trending).find("a").attr("title");
         const rawThumbnail =
-          $(relate).find(".post-thumbnail a img").attr("src") || "";
-        const thumbnail = rawThumbnail.replace(/-\d+x\d+(?=\.\w+$)/, "");
-        const slug = createSlug(title);
+          $(trending).find(".entry-image").attr("data-image") || "";
+        const thumbnail = resizeImageUrl(rawThumbnail);
+        const rawUrl = $("a.entry-inner, .entry-image-wrap").attr("href") || "";
+        const slug = rawUrl
+          .replace("https://blog.basahjeruk.info/", "")
+          .replace(".html", "");
+        const dateTime = $(trending).find(".entry-time time").attr("datetime");
 
-        return { title, thumbnail };
+        return { title, thumbnail, slug, dateTime };
       })
       .get();
 
     res.json({
       success: true,
       data: {
-        title,
-        video,
-        episode,
-        airDate,
-        schedule,
-        director,
-        production,
-        uploadDate,
-        duration,
-        thumbnailUrl,
-        dramaTitle,
-        dramaSlug,
+        drama: {
+          episodeTitle,
+          title,
+          thumbnail,
+          dateTime,
+          paragraph,
+          episod,
+          tarikhTayangan,
+          waktuSiaran,
+          rangkaian,
+          pengarah,
+          produksi,
+          videoSrc: videoUrls[0] || null, // Ambil yang pertama jika ada
+        },
       },
-      relate: relatedDramas,
-      trending: trendingDramas,
+      trending: trendings,
     });
   } catch (error) {
     console.error("Scraping Error:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to scrape episode detail.",
+      message: "Error while scraping data",
     });
   }
 });
