@@ -4,3 +4,7 @@ export function resizeImageUrl(url: string, width = 640): string {
 export function cleanThumbnailUrl(url: string): string {
   return url.replace(/-\d+x\d+(?=\.webp)/, "");
 }
+
+export function upgradePosterUrl(url: string): string {
+  return url.replace(/\/s\d+\//, "/s1600/");
+}

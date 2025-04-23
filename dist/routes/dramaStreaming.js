@@ -40,6 +40,9 @@ const express_1 = require("express");
 const cheerio = __importStar(require("cheerio"));
 const puppeteer_1 = __importDefault(require("puppeteer"));
 const image_1 = require("../utils/image");
+const createSlug_1 = require("../libs/createSlug");
+const prisma_1 = __importDefault(require("../prisma"));
+const downloadFile_1 = require("../utils/downloadFile");
 const router = (0, express_1.Router)();
 router.get("/:year/:month/:slug", async (req, res) => {
     try {
@@ -55,12 +58,9 @@ router.get("/:year/:month/:slug", async (req, res) => {
         const videoUrls = [];
         await page.setRequestInterception(true);
         page.on("request", (req) => req.continue());
-        page.on("response", async (response) => {
-            const resUrl = response.url();
-            const contentType = response.headers()["content-type"] || "";
-            if (resUrl.includes(".m3u8") ||
-                contentType.includes("application/vnd.apple.mpegurl") ||
-                (resUrl.includes("filemoon.to") && contentType.includes("text/html"))) {
+        page.on("request", async (request) => {
+            const resUrl = request.url();
+            if (resUrl.includes(".m3u8") || resUrl.includes("filemoon.to")) {
                 if (!videoUrls.includes(resUrl)) {
                     videoUrls.push(resUrl);
                 }
@@ -71,14 +71,17 @@ router.get("/:year/:month/:slug", async (req, res) => {
         const html = await page.content();
         await browser.close();
         const $ = cheerio.load(html);
-        const episodeTitle = $("article").find(".entry-title").text().trim();
+        const episodeTitle = $(".blog-post").find("h1.entry-title").text().trim();
+        const episodeSlug = (0, createSlug_1.createSlug)(episodeTitle);
         const dateTime = $(".entry-time").find("time").attr("datetime");
         const paragraph = $("div[style*='box-sizing: border-box'][style*='font-size: 17px']")
             .first()
             .text()
             .trim();
         const title = $("h2").first().text().trim();
-        const episod = $("b:contains('Episod:')")
+        const dramaSlug = (0, createSlug_1.createSlug)(title);
+        const currentEpisode = episodeTitle.match(/Episod\s*(\d+)/i)?.[1] || null;
+        const totalEpisodes = $("b:contains('Episod:')")
             .parent()
             .text()
             .replace("Episod:", "")
@@ -109,21 +112,58 @@ router.get("/:year/:month/:slug", async (req, res) => {
             .replace("Produksi:", "")
             .trim();
         const rawThumbnail = $(".entry-content-wrap").find("img").attr("src") || "";
-        const thumbnail = (0, image_1.resizeImageUrl)(rawThumbnail);
-        const trendings = $(".PopularPosts")
-            .find(".side-item")
-            .map((_, trending) => {
-            const title = $(trending).find("a").attr("title");
-            const rawThumbnail = $(trending).find(".entry-image").attr("data-image") || "";
-            const thumbnail = (0, image_1.resizeImageUrl)(rawThumbnail);
-            const rawUrl = $("a.entry-inner, .entry-image-wrap").attr("href") || "";
-            const slug = rawUrl
-                .replace("https://blog.basahjeruk.info/", "")
-                .replace(".html", "");
-            const dateTime = $(trending).find(".entry-time time").attr("datetime");
-            return { title, thumbnail, slug, dateTime };
-        })
-            .get();
+        const thumbnail = (0, image_1.upgradePosterUrl)(rawThumbnail);
+        let savedPath = null;
+        try {
+            if (videoUrls[0]) {
+                console.log("Start download:", videoUrls[0]);
+                savedPath = await (0, downloadFile_1.downloadM3U8ViaBrowser)(videoUrls[0], `${title.replace(/\s+/g, "-").toLowerCase()}-${currentEpisode}.m3u8`);
+                console.log("✅ File saved at:", savedPath);
+            }
+        }
+        catch (err) {
+            console.error("❌ Error saat download video:", err);
+        }
+        //Upsert Drama
+        const drama = await prisma_1.default.drama.upsert({
+            where: { slug: dramaSlug },
+            update: {},
+            create: {
+                title,
+                description: paragraph,
+                thumbnail,
+                tarikhTayangan,
+                waktuSiaran,
+                rangkaian,
+                pengarah,
+                produksi,
+                slug: dramaSlug,
+            },
+        });
+        if (savedPath) {
+            // Upsert Episode (hindari duplikat slug)
+            await prisma_1.default.episode.upsert({
+                where: { slug: episodeSlug },
+                update: {
+                    title: episodeTitle,
+                    episodeNum: currentEpisode,
+                    videoSrc: savedPath,
+                    publishedAt: dateTime ? new Date(dateTime) : undefined,
+                    dramaId: drama.id,
+                },
+                create: {
+                    title: episodeTitle,
+                    slug: episodeSlug,
+                    episodeNum: currentEpisode,
+                    videoSrc: savedPath,
+                    publishedAt: dateTime ? new Date(dateTime) : undefined,
+                    dramaId: drama.id,
+                },
+            });
+        }
+        else {
+            console.warn(`Video not saved, skip episode: ${episodeTitle}`);
+        }
         res.json({
             success: true,
             data: {
@@ -133,16 +173,19 @@ router.get("/:year/:month/:slug", async (req, res) => {
                     thumbnail,
                     dateTime,
                     paragraph,
-                    episod,
+                    totalEpisodes,
                     tarikhTayangan,
                     waktuSiaran,
                     rangkaian,
                     pengarah,
                     produksi,
                     videoSrc: videoUrls[0] || null, // Ambil yang pertama jika ada
+                    savedPath,
+                    dramaSlug,
+                    episodeSlug,
+                    currentEpisode,
                 },
             },
-            trending: trendings,
         });
     }
     catch (error) {
