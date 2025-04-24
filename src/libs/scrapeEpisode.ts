@@ -5,7 +5,7 @@ export async function scrapeEpisode(url: string) {
       .replace("https://blog.basahjeruk.info/", "")
       .replace(".html", "");
 
-    const endpoint = `http://localhost:3001/api/v1/watch/${trimmedUrl}`;
+    const endpoint = `https://api.mangeakkk.my.id/api/v1/watch/${trimmedUrl}`;
 
     const res = await fetch(endpoint);
     if (!res.ok) {
