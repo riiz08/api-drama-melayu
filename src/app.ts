@@ -28,7 +28,7 @@ app.use("/api/v1/watch", dramaStreaming);
 app.use("/api/v1/proxy", proxyRouter);
 app.use("/api/v1/dramas/latest-update", latestUpdate);
 app.use("/api/v1", allDrama);
-app.use("/api/v1/episodes", dramaDetail);
+app.use("/api/v1/drama", dramaDetail);
 app.use("/api/v1", episodeDetail);
 app.use("/api/v1/search", searchDrama);
 
