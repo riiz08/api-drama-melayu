@@ -4,7 +4,7 @@ import dramaStreaming from "./routes/dramaStreaming";
 import home from "./routes/home";
 import proxyRouter from "./routes/proxy";
 import allDrama from "./routes/allDrama";
-import episodeDetail from "./routes/episodeDetail";
+import dramaDetail from "./routes/dramaDetail";
 import dotenv from "dotenv";
 import episodeLists from "./routes/episodeLists";
 import latestUpdate from "./routes/latestUpdate";
@@ -29,7 +29,7 @@ app.use("/api/v1/proxy", proxyRouter);
 app.use("/api/v1/dramas/latest-update", latestUpdate);
 app.use("/api/v1", allDrama);
 app.use("/api/v1/episodes", episodeLists);
-app.use("/api/v1", episodeDetail);
+app.use("/api/v1", dramaDetail);
 app.use("/api/v1/search", searchDrama);
 
 // Start server
