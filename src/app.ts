@@ -9,6 +9,7 @@ import dotenv from "dotenv";
 import episodeLists from "./routes/episodeLists";
 import latestUpdate from "./routes/latestUpdate";
 import "./jobs/batchScraper";
+import searchDrama from "./routes/searchDrama";
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use("/api/v1/dramas/latest-update", latestUpdate);
 app.use("/api/v1", allDrama);
 app.use("/api/v1/episodes", episodeLists);
 app.use("/api/v1", episodeDetail);
+app.use("/api/v1/search", searchDrama);
 
 // Start server
 app.listen(PORT, () => {

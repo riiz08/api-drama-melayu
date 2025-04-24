@@ -14,6 +14,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const episodeLists_1 = __importDefault(require("./routes/episodeLists"));
 const latestUpdate_1 = __importDefault(require("./routes/latestUpdate"));
 require("./jobs/batchScraper");
+const searchDrama_1 = __importDefault(require("./routes/searchDrama"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
@@ -28,6 +29,7 @@ app.use("/api/v1/dramas/latest-update", latestUpdate_1.default);
 app.use("/api/v1", allDrama_1.default);
 app.use("/api/v1/episodes", episodeLists_1.default);
 app.use("/api/v1", episodeDetail_1.default);
+app.use("/api/v1/search", searchDrama_1.default);
 // Start server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
