@@ -4,7 +4,7 @@ import prisma from "../prisma";
 
 const router = Router();
 
-router.get("/episode/:slug", async (req: Request, res: Response) => {
+router.get("/drama/:slug", async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;
 
