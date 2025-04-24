@@ -1,36 +1,52 @@
-// routes/dramaRoutes.ts
-import { Request, Response, Router } from "express";
+import { Router, Request, Response } from "express";
 import prisma from "../prisma";
 
 const router = Router();
 
-router.get("/drama/:slug", async (req: Request, res: Response) => {
+router.get("/:slug", async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;
 
-    const existingEpisode = await prisma.episode.findUnique({
+    // Cari drama berdasarkan slug
+    const drama = await prisma.drama.findUnique({
       where: { slug },
     });
 
-    if (!existingEpisode)
-      return void res
-        .status(404)
-        .json({ success: false, messsage: "Episode not found" });
+    if (!drama) {
+      return void res.status(404).json({
+        success: false,
+        message: "Drama not found",
+      });
+    }
 
-    const dramaDetail = await prisma.drama.findUnique({
-      where: { id: existingEpisode.dramaId },
+    // Ambil daftar episode berdasarkan dramaId
+    const episodes = await prisma.episode.findMany({
+      where: { dramaId: drama.id },
+      orderBy: {
+        publishedAt: "asc",
+      },
+      select: {
+        title: true,
+        slug: true,
+        episodeNum: true,
+        videoSrc: true,
+        publishedAt: true,
+      },
     });
 
-    const episode = await prisma.episode.findUnique({
-      where: { slug },
+    res.json({
+      success: true,
+      data: {
+        drama,
+        episodes,
+      },
     });
-
-    return void res
-      .status(200)
-      .json({ success: true, data: dramaDetail, episode });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false, message: error });
+    console.error("Error fetching episodes:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 });
 
