@@ -7,7 +7,7 @@ async function scrapeEpisode(url) {
         const trimmedUrl = url
             .replace("https://blog.basahjeruk.info/", "")
             .replace(".html", "");
-        const endpoint = `http://localhost:3001/api/v1/watch/${trimmedUrl}`;
+        const endpoint = `https://api.mangeakkk.my.id/api/v1/watch/${trimmedUrl}`;
         const res = await fetch(endpoint);
         if (!res.ok) {
             console.error(`❌ Gagal scrape episode: ${trimmedUrl} (status: ${res.status})`);

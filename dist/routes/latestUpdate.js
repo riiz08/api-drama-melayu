@@ -9,7 +9,7 @@ const router = (0, express_1.Router)();
 router.get("/", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 8;
+        const limit = parseInt(req.query.limit) || 14;
         const skip = (page - 1) * limit;
         const [total, episodes] = await Promise.all([
             prisma_1.default.episode.count(),

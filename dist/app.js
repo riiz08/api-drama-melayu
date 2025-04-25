@@ -11,7 +11,7 @@ const proxy_1 = __importDefault(require("./routes/proxy"));
 const allDrama_1 = __importDefault(require("./routes/allDrama"));
 const episodeDetail_1 = __importDefault(require("./routes/episodeDetail"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const episodeLists_1 = __importDefault(require("./routes/episodeLists"));
+const dramaDetail_1 = __importDefault(require("./routes/dramaDetail"));
 const latestUpdate_1 = __importDefault(require("./routes/latestUpdate"));
 require("./jobs/batchScraper");
 const searchDrama_1 = __importDefault(require("./routes/searchDrama"));
@@ -27,7 +27,7 @@ app.use("/api/v1/watch", dramaStreaming_1.default);
 app.use("/api/v1/proxy", proxy_1.default);
 app.use("/api/v1/dramas/latest-update", latestUpdate_1.default);
 app.use("/api/v1", allDrama_1.default);
-app.use("/api/v1/episodes", episodeLists_1.default);
+app.use("/api/v1/drama", dramaDetail_1.default);
 app.use("/api/v1", episodeDetail_1.default);
 app.use("/api/v1/search", searchDrama_1.default);
 // Start server

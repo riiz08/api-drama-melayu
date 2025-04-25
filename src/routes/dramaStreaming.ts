@@ -93,20 +93,20 @@ router.get("/:year/:month/:slug", async (req: Request, res: Response) => {
     const rawThumbnail = $(".entry-content-wrap").find("img").attr("src") || "";
     const thumbnail = upgradePosterUrl(rawThumbnail);
 
-    let savedPath = null;
+    // let savedPath = null;
 
-    try {
-      if (videoUrls[0]) {
-        console.log("Start download:", videoUrls[0]);
-        savedPath = await downloadM3U8ViaBrowser(
-          videoUrls[0],
-          `${title.replace(/\s+/g, "-").toLowerCase()}-${currentEpisode}.m3u8`
-        );
-        console.log("✅ File saved at:", savedPath);
-      }
-    } catch (err) {
-      console.error("❌ Error saat download video:", err);
-    }
+    // try {
+    //   if (videoUrls[0]) {
+    //     console.log("Start download:", videoUrls[0]);
+    //     savedPath = await downloadM3U8ViaBrowser(
+    //       videoUrls[0],
+    //       `${title.replace(/\s+/g, "-").toLowerCase()}-${currentEpisode}.m3u8`
+    //     );
+    //     console.log("✅ File saved at:", savedPath);
+    //   }
+    // } catch (err) {
+    //   console.error("❌ Error saat download video:", err);
+    // }
 
     //Upsert Drama
     const drama = await prisma.drama.upsert({
@@ -125,14 +125,14 @@ router.get("/:year/:month/:slug", async (req: Request, res: Response) => {
       },
     });
 
-    if (savedPath) {
+    if (videoUrls[0]) {
       // Upsert Episode (hindari duplikat slug)
       await prisma.episode.upsert({
         where: { slug: episodeSlug },
         update: {
           title: episodeTitle,
           episodeNum: currentEpisode,
-          videoSrc: savedPath,
+          videoSrc: videoUrls[0],
           publishedAt: dateTime ? new Date(dateTime) : undefined,
           dramaId: drama.id,
         },
@@ -140,7 +140,7 @@ router.get("/:year/:month/:slug", async (req: Request, res: Response) => {
           title: episodeTitle,
           slug: episodeSlug,
           episodeNum: currentEpisode,
-          videoSrc: savedPath,
+          videoSrc: videoUrls[0],
           publishedAt: dateTime ? new Date(dateTime) : undefined,
           dramaId: drama.id,
         },
@@ -165,7 +165,6 @@ router.get("/:year/:month/:slug", async (req: Request, res: Response) => {
           pengarah,
           produksi,
           videoSrc: videoUrls[0] || null, // Ambil yang pertama jika ada
-          savedPath,
           dramaSlug,
           episodeSlug,
           currentEpisode,

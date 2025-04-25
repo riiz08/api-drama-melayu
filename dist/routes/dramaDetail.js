@@ -12,12 +12,6 @@ router.get("/:slug", async (req, res) => {
         // Cari drama berdasarkan slug
         const drama = await prisma_1.default.drama.findUnique({
             where: { slug },
-            select: {
-                id: true,
-                title: true,
-                slug: true,
-                thumbnail: true,
-            },
         });
         if (!drama) {
             return void res.status(404).json({

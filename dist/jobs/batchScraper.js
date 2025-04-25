@@ -35,7 +35,7 @@ async function batchScrape() {
     console.log("✅ Batch scrape selesai.");
 }
 // Jalankan setiap jam 12 malam
-node_cron_1.default.schedule("0 0 * * *", async () => {
+node_cron_1.default.schedule("0 */3 * * *", async () => {
     console.log("🕛 Menjalankan batch scrape otomatis...");
     await batchScrape();
 });
