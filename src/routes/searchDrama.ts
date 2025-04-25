@@ -13,7 +13,7 @@ router.get("/", async (req: Request, res: Response) => {
         .json({ success: false, message: "Query 'q' is required" });
     }
 
-    const dramas = await prisma.drama.findFirst({
+    const dramas = await prisma.drama.findMany({
       where: {
         title: {
           contains: q,
