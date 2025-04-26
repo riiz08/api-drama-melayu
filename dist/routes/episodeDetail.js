@@ -15,32 +15,27 @@ router.get("/episode/:slug", async (req, res) => {
         if (!episode) {
             return void res.status(404).json({ error: "Episode not found" });
         }
-        if (episode.episodeNum == null) {
-            return void res.status(400).json({ error: "Episode number is missing." });
-        }
-        const episodeNumCurrent = episode.episodeNum; // Aman karena sudah dicek
-        const prevEpisode = await prisma_1.default.episode.findFirst({
-            where: {
-                dramaId: episode.dramaId,
-                episodeNum: {
-                    lt: episodeNumCurrent,
-                },
-            },
-            orderBy: {
-                episodeNum: "desc",
-            },
+        // Ambil semua episode dari drama yang sama
+        const allEpisodes = await prisma_1.default.episode.findMany({
+            where: { dramaId: episode.dramaId },
+            select: { id: true, slug: true, title: true },
         });
-        const nextEpisode = await prisma_1.default.episode.findFirst({
-            where: {
-                dramaId: episode.dramaId,
-                episodeNum: {
-                    gt: episodeNumCurrent,
-                },
-            },
-            orderBy: {
-                episodeNum: "asc",
-            },
-        });
+        // Urutkan episode secara manual berdasarkan angka di slug
+        const extractEpisodeNum = (slug) => {
+            const match = slug.match(/(\d+)(?!.*\d)/); // ambil angka terakhir dari slug
+            return match ? parseInt(match[1], 10) : NaN;
+        };
+        const sortedEpisodes = allEpisodes
+            .map((ep) => ({
+            ...ep,
+            episodeNum: extractEpisodeNum(ep.slug),
+        }))
+            .filter((ep) => !isNaN(ep.episodeNum))
+            .sort((a, b) => a.episodeNum - b.episodeNum);
+        // Cari episode yang sebelumnya dan berikutnya berdasarkan urutan yang benar
+        const currentEpisodeNum = extractEpisodeNum(episode.slug);
+        const prevEpisode = sortedEpisodes.find((ep) => ep.episodeNum === currentEpisodeNum - 1);
+        const nextEpisode = sortedEpisodes.find((ep) => ep.episodeNum === currentEpisodeNum + 1);
         res.json({
             episode,
             prevEpisode: prevEpisode
