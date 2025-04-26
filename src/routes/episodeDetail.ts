@@ -1,4 +1,3 @@
-// routes/dramaRoutes.ts
 import { Request, Response, Router } from "express";
 import prisma from "../prisma";
 
@@ -16,41 +15,35 @@ router.get("/episode/:slug", async (req: Request, res: Response) => {
       return void res.status(404).json({ error: "Episode not found" });
     }
 
-    const episodeNumCurrent = parseInt(episode.episodeNum || "0");
+    if (episode.episodeNum == null) {
+      return void res.status(400).json({ error: "Episode number is missing." });
+    }
 
-    // Episode sebelumnya
-    const prevEpisode = await prisma.episode
-      .findFirst({
-        where: {
-          dramaId: episode.dramaId,
-          episodeNum: {
-            not: null,
-          },
-        },
-        orderBy: {
-          episodeNum: "desc", // Masih pakai string, tapi filter di JS
-        },
-      })
-      .then((eps) =>
-        eps && parseInt(eps.episodeNum || "0") < episodeNumCurrent ? eps : null
-      );
+    const episodeNumCurrent = episode.episodeNum; // Aman karena sudah dicek
 
-    // Episode sesudahnya
-    const nextEpisode = await prisma.episode
-      .findFirst({
-        where: {
-          dramaId: episode.dramaId,
-          episodeNum: {
-            not: null,
-          },
+    const prevEpisode = await prisma.episode.findFirst({
+      where: {
+        dramaId: episode.dramaId,
+        episodeNum: {
+          lt: episodeNumCurrent,
         },
-        orderBy: {
-          episodeNum: "asc",
+      },
+      orderBy: {
+        episodeNum: "desc",
+      },
+    });
+
+    const nextEpisode = await prisma.episode.findFirst({
+      where: {
+        dramaId: episode.dramaId,
+        episodeNum: {
+          gt: episodeNumCurrent,
         },
-      })
-      .then((eps) =>
-        eps && parseInt(eps.episodeNum || "0") > episodeNumCurrent ? eps : null
-      );
+      },
+      orderBy: {
+        episodeNum: "asc",
+      },
+    });
 
     res.json({
       episode,

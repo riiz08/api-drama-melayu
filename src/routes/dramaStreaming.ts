@@ -59,7 +59,11 @@ router.get("/:year/:month/:slug", async (req: Request, res: Response) => {
       .trim();
     const title = $("h2").first().text().trim();
     const dramaSlug = createSlug(title);
-    const currentEpisode = episodeTitle.match(/Episod\s*(\d+)/i)?.[1] || null;
+    const currentEpisodeMatch =
+      episodeTitle.match(/Episod\s*(\d+)/i)?.[1] || null;
+    const currentEpisode = currentEpisodeMatch
+      ? parseInt(currentEpisodeMatch, 10)
+      : null;
     const totalEpisodes = $("b:contains('Episod:')")
       .parent()
       .text()
@@ -92,21 +96,6 @@ router.get("/:year/:month/:slug", async (req: Request, res: Response) => {
       .trim();
     const rawThumbnail = $(".entry-content-wrap").find("img").attr("src") || "";
     const thumbnail = upgradePosterUrl(rawThumbnail);
-
-    // let savedPath = null;
-
-    // try {
-    //   if (videoUrls[0]) {
-    //     console.log("Start download:", videoUrls[0]);
-    //     savedPath = await downloadM3U8ViaBrowser(
-    //       videoUrls[0],
-    //       `${title.replace(/\s+/g, "-").toLowerCase()}-${currentEpisode}.m3u8`
-    //     );
-    //     console.log("✅ File saved at:", savedPath);
-    //   }
-    // } catch (err) {
-    //   console.error("❌ Error saat download video:", err);
-    // }
 
     //Upsert Drama
     const drama = await prisma.drama.upsert({

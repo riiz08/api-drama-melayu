@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -18,27 +12,27 @@ model Drama {
   id             String    @id @default(cuid())
   slug           String    @unique
   title          String
-  description    String? // dari "paragraph"
+  description    String?
   thumbnail      String
   tarikhTayangan String?
   waktuSiaran    String?
   rangkaian      String?
   pengarah       String?
   produksi       String?
-  episodes       Episode[]
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+  episodes       Episode[]
 }
 
 model Episode {
   id          String    @id @default(cuid())
   slug        String    @unique
   title       String
-  episodeNum  String?
   videoSrc    String
   publishedAt DateTime?
   dramaId     String
-  drama       Drama     @relation(fields: [dramaId], references: [id])
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  episodeNum  Int?
+  drama       Drama     @relation(fields: [dramaId], references: [id])
 }

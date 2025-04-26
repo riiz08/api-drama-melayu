@@ -136,12 +136,12 @@ exports.Prisma.EpisodeScalarFieldEnum = {
   id: 'id',
   slug: 'slug',
   title: 'title',
-  episodeNum: 'episodeNum',
   videoSrc: 'videoSrc',
   publishedAt: 'publishedAt',
   dramaId: 'dramaId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  episodeNum: 'episodeNum'
 };
 
 exports.Prisma.SortOrder = {

@@ -2157,82 +2157,100 @@ export namespace Prisma {
 
   export type AggregateEpisode = {
     _count: EpisodeCountAggregateOutputType | null
+    _avg: EpisodeAvgAggregateOutputType | null
+    _sum: EpisodeSumAggregateOutputType | null
     _min: EpisodeMinAggregateOutputType | null
     _max: EpisodeMaxAggregateOutputType | null
+  }
+
+  export type EpisodeAvgAggregateOutputType = {
+    episodeNum: number | null
+  }
+
+  export type EpisodeSumAggregateOutputType = {
+    episodeNum: number | null
   }
 
   export type EpisodeMinAggregateOutputType = {
     id: string | null
     slug: string | null
     title: string | null
-    episodeNum: string | null
     videoSrc: string | null
     publishedAt: Date | null
     dramaId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    episodeNum: number | null
   }
 
   export type EpisodeMaxAggregateOutputType = {
     id: string | null
     slug: string | null
     title: string | null
-    episodeNum: string | null
     videoSrc: string | null
     publishedAt: Date | null
     dramaId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    episodeNum: number | null
   }
 
   export type EpisodeCountAggregateOutputType = {
     id: number
     slug: number
     title: number
-    episodeNum: number
     videoSrc: number
     publishedAt: number
     dramaId: number
     createdAt: number
     updatedAt: number
+    episodeNum: number
     _all: number
   }
 
+
+  export type EpisodeAvgAggregateInputType = {
+    episodeNum?: true
+  }
+
+  export type EpisodeSumAggregateInputType = {
+    episodeNum?: true
+  }
 
   export type EpisodeMinAggregateInputType = {
     id?: true
     slug?: true
     title?: true
-    episodeNum?: true
     videoSrc?: true
     publishedAt?: true
     dramaId?: true
     createdAt?: true
     updatedAt?: true
+    episodeNum?: true
   }
 
   export type EpisodeMaxAggregateInputType = {
     id?: true
     slug?: true
     title?: true
-    episodeNum?: true
     videoSrc?: true
     publishedAt?: true
     dramaId?: true
     createdAt?: true
     updatedAt?: true
+    episodeNum?: true
   }
 
   export type EpisodeCountAggregateInputType = {
     id?: true
     slug?: true
     title?: true
-    episodeNum?: true
     videoSrc?: true
     publishedAt?: true
     dramaId?: true
     createdAt?: true
     updatedAt?: true
+    episodeNum?: true
     _all?: true
   }
 
@@ -2274,6 +2292,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: EpisodeAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: EpisodeSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: EpisodeMinAggregateInputType
@@ -2304,6 +2334,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: EpisodeCountAggregateInputType | true
+    _avg?: EpisodeAvgAggregateInputType
+    _sum?: EpisodeSumAggregateInputType
     _min?: EpisodeMinAggregateInputType
     _max?: EpisodeMaxAggregateInputType
   }
@@ -2312,13 +2344,15 @@ export namespace Prisma {
     id: string
     slug: string
     title: string
-    episodeNum: string | null
     videoSrc: string
     publishedAt: Date | null
     dramaId: string
     createdAt: Date
     updatedAt: Date
+    episodeNum: number | null
     _count: EpisodeCountAggregateOutputType | null
+    _avg: EpisodeAvgAggregateOutputType | null
+    _sum: EpisodeSumAggregateOutputType | null
     _min: EpisodeMinAggregateOutputType | null
     _max: EpisodeMaxAggregateOutputType | null
   }
@@ -2341,12 +2375,12 @@ export namespace Prisma {
     id?: boolean
     slug?: boolean
     title?: boolean
-    episodeNum?: boolean
     videoSrc?: boolean
     publishedAt?: boolean
     dramaId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    episodeNum?: boolean
     drama?: boolean | DramaDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["episode"]>
 
@@ -2354,12 +2388,12 @@ export namespace Prisma {
     id?: boolean
     slug?: boolean
     title?: boolean
-    episodeNum?: boolean
     videoSrc?: boolean
     publishedAt?: boolean
     dramaId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    episodeNum?: boolean
     drama?: boolean | DramaDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["episode"]>
 
@@ -2367,12 +2401,12 @@ export namespace Prisma {
     id?: boolean
     slug?: boolean
     title?: boolean
-    episodeNum?: boolean
     videoSrc?: boolean
     publishedAt?: boolean
     dramaId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    episodeNum?: boolean
     drama?: boolean | DramaDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["episode"]>
 
@@ -2380,15 +2414,15 @@ export namespace Prisma {
     id?: boolean
     slug?: boolean
     title?: boolean
-    episodeNum?: boolean
     videoSrc?: boolean
     publishedAt?: boolean
     dramaId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    episodeNum?: boolean
   }
 
-  export type EpisodeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "slug" | "title" | "episodeNum" | "videoSrc" | "publishedAt" | "dramaId" | "createdAt" | "updatedAt", ExtArgs["result"]["episode"]>
+  export type EpisodeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "slug" | "title" | "videoSrc" | "publishedAt" | "dramaId" | "createdAt" | "updatedAt" | "episodeNum", ExtArgs["result"]["episode"]>
   export type EpisodeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     drama?: boolean | DramaDefaultArgs<ExtArgs>
   }
@@ -2408,12 +2442,12 @@ export namespace Prisma {
       id: string
       slug: string
       title: string
-      episodeNum: string | null
       videoSrc: string
       publishedAt: Date | null
       dramaId: string
       createdAt: Date
       updatedAt: Date
+      episodeNum: number | null
     }, ExtArgs["result"]["episode"]>
     composites: {}
   }
@@ -2841,12 +2875,12 @@ export namespace Prisma {
     readonly id: FieldRef<"Episode", 'String'>
     readonly slug: FieldRef<"Episode", 'String'>
     readonly title: FieldRef<"Episode", 'String'>
-    readonly episodeNum: FieldRef<"Episode", 'String'>
     readonly videoSrc: FieldRef<"Episode", 'String'>
     readonly publishedAt: FieldRef<"Episode", 'DateTime'>
     readonly dramaId: FieldRef<"Episode", 'String'>
     readonly createdAt: FieldRef<"Episode", 'DateTime'>
     readonly updatedAt: FieldRef<"Episode", 'DateTime'>
+    readonly episodeNum: FieldRef<"Episode", 'Int'>
   }
     
 
@@ -3297,12 +3331,12 @@ export namespace Prisma {
     id: 'id',
     slug: 'slug',
     title: 'title',
-    episodeNum: 'episodeNum',
     videoSrc: 'videoSrc',
     publishedAt: 'publishedAt',
     dramaId: 'dramaId',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    episodeNum: 'episodeNum'
   };
 
   export type EpisodeScalarFieldEnum = (typeof EpisodeScalarFieldEnum)[keyof typeof EpisodeScalarFieldEnum]
@@ -3376,6 +3410,20 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
   /**
    * Deep Input Types
@@ -3479,12 +3527,12 @@ export namespace Prisma {
     id?: StringFilter<"Episode"> | string
     slug?: StringFilter<"Episode"> | string
     title?: StringFilter<"Episode"> | string
-    episodeNum?: StringNullableFilter<"Episode"> | string | null
     videoSrc?: StringFilter<"Episode"> | string
     publishedAt?: DateTimeNullableFilter<"Episode"> | Date | string | null
     dramaId?: StringFilter<"Episode"> | string
     createdAt?: DateTimeFilter<"Episode"> | Date | string
     updatedAt?: DateTimeFilter<"Episode"> | Date | string
+    episodeNum?: IntNullableFilter<"Episode"> | number | null
     drama?: XOR<DramaScalarRelationFilter, DramaWhereInput>
   }
 
@@ -3492,12 +3540,12 @@ export namespace Prisma {
     id?: SortOrder
     slug?: SortOrder
     title?: SortOrder
-    episodeNum?: SortOrderInput | SortOrder
     videoSrc?: SortOrder
     publishedAt?: SortOrderInput | SortOrder
     dramaId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    episodeNum?: SortOrderInput | SortOrder
     drama?: DramaOrderByWithRelationInput
   }
 
@@ -3508,12 +3556,12 @@ export namespace Prisma {
     OR?: EpisodeWhereInput[]
     NOT?: EpisodeWhereInput | EpisodeWhereInput[]
     title?: StringFilter<"Episode"> | string
-    episodeNum?: StringNullableFilter<"Episode"> | string | null
     videoSrc?: StringFilter<"Episode"> | string
     publishedAt?: DateTimeNullableFilter<"Episode"> | Date | string | null
     dramaId?: StringFilter<"Episode"> | string
     createdAt?: DateTimeFilter<"Episode"> | Date | string
     updatedAt?: DateTimeFilter<"Episode"> | Date | string
+    episodeNum?: IntNullableFilter<"Episode"> | number | null
     drama?: XOR<DramaScalarRelationFilter, DramaWhereInput>
   }, "id" | "slug">
 
@@ -3521,15 +3569,17 @@ export namespace Prisma {
     id?: SortOrder
     slug?: SortOrder
     title?: SortOrder
-    episodeNum?: SortOrderInput | SortOrder
     videoSrc?: SortOrder
     publishedAt?: SortOrderInput | SortOrder
     dramaId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    episodeNum?: SortOrderInput | SortOrder
     _count?: EpisodeCountOrderByAggregateInput
+    _avg?: EpisodeAvgOrderByAggregateInput
     _max?: EpisodeMaxOrderByAggregateInput
     _min?: EpisodeMinOrderByAggregateInput
+    _sum?: EpisodeSumOrderByAggregateInput
   }
 
   export type EpisodeScalarWhereWithAggregatesInput = {
@@ -3539,12 +3589,12 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Episode"> | string
     slug?: StringWithAggregatesFilter<"Episode"> | string
     title?: StringWithAggregatesFilter<"Episode"> | string
-    episodeNum?: StringNullableWithAggregatesFilter<"Episode"> | string | null
     videoSrc?: StringWithAggregatesFilter<"Episode"> | string
     publishedAt?: DateTimeNullableWithAggregatesFilter<"Episode"> | Date | string | null
     dramaId?: StringWithAggregatesFilter<"Episode"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Episode"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Episode"> | Date | string
+    episodeNum?: IntNullableWithAggregatesFilter<"Episode"> | number | null
   }
 
   export type DramaCreateInput = {
@@ -3660,11 +3710,11 @@ export namespace Prisma {
     id?: string
     slug: string
     title: string
-    episodeNum?: string | null
     videoSrc: string
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    episodeNum?: number | null
     drama: DramaCreateNestedOneWithoutEpisodesInput
   }
 
@@ -3672,23 +3722,23 @@ export namespace Prisma {
     id?: string
     slug: string
     title: string
-    episodeNum?: string | null
     videoSrc: string
     publishedAt?: Date | string | null
     dramaId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    episodeNum?: number | null
   }
 
   export type EpisodeUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
-    episodeNum?: NullableStringFieldUpdateOperationsInput | string | null
     videoSrc?: StringFieldUpdateOperationsInput | string
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    episodeNum?: NullableIntFieldUpdateOperationsInput | number | null
     drama?: DramaUpdateOneRequiredWithoutEpisodesNestedInput
   }
 
@@ -3696,47 +3746,47 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
-    episodeNum?: NullableStringFieldUpdateOperationsInput | string | null
     videoSrc?: StringFieldUpdateOperationsInput | string
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dramaId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    episodeNum?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type EpisodeCreateManyInput = {
     id?: string
     slug: string
     title: string
-    episodeNum?: string | null
     videoSrc: string
     publishedAt?: Date | string | null
     dramaId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    episodeNum?: number | null
   }
 
   export type EpisodeUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
-    episodeNum?: NullableStringFieldUpdateOperationsInput | string | null
     videoSrc?: StringFieldUpdateOperationsInput | string
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    episodeNum?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type EpisodeUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
-    episodeNum?: NullableStringFieldUpdateOperationsInput | string | null
     videoSrc?: StringFieldUpdateOperationsInput | string
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dramaId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    episodeNum?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -3901,6 +3951,17 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type DramaScalarRelationFilter = {
     is?: DramaWhereInput
     isNot?: DramaWhereInput
@@ -3910,36 +3971,44 @@ export namespace Prisma {
     id?: SortOrder
     slug?: SortOrder
     title?: SortOrder
-    episodeNum?: SortOrder
     videoSrc?: SortOrder
     publishedAt?: SortOrder
     dramaId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    episodeNum?: SortOrder
+  }
+
+  export type EpisodeAvgOrderByAggregateInput = {
+    episodeNum?: SortOrder
   }
 
   export type EpisodeMaxOrderByAggregateInput = {
     id?: SortOrder
     slug?: SortOrder
     title?: SortOrder
-    episodeNum?: SortOrder
     videoSrc?: SortOrder
     publishedAt?: SortOrder
     dramaId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    episodeNum?: SortOrder
   }
 
   export type EpisodeMinOrderByAggregateInput = {
     id?: SortOrder
     slug?: SortOrder
     title?: SortOrder
-    episodeNum?: SortOrder
     videoSrc?: SortOrder
     publishedAt?: SortOrder
     dramaId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    episodeNum?: SortOrder
+  }
+
+  export type EpisodeSumOrderByAggregateInput = {
+    episodeNum?: SortOrder
   }
 
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -3954,6 +4023,22 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type EpisodeCreateNestedManyWithoutDramaInput = {
@@ -4018,6 +4103,14 @@ export namespace Prisma {
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type DramaUpdateOneRequiredWithoutEpisodesNestedInput = {
@@ -4162,26 +4255,53 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
   export type EpisodeCreateWithoutDramaInput = {
     id?: string
     slug: string
     title: string
-    episodeNum?: string | null
     videoSrc: string
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    episodeNum?: number | null
   }
 
   export type EpisodeUncheckedCreateWithoutDramaInput = {
     id?: string
     slug: string
     title: string
-    episodeNum?: string | null
     videoSrc: string
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    episodeNum?: number | null
   }
 
   export type EpisodeCreateOrConnectWithoutDramaInput = {
@@ -4217,12 +4337,12 @@ export namespace Prisma {
     id?: StringFilter<"Episode"> | string
     slug?: StringFilter<"Episode"> | string
     title?: StringFilter<"Episode"> | string
-    episodeNum?: StringNullableFilter<"Episode"> | string | null
     videoSrc?: StringFilter<"Episode"> | string
     publishedAt?: DateTimeNullableFilter<"Episode"> | Date | string | null
     dramaId?: StringFilter<"Episode"> | string
     createdAt?: DateTimeFilter<"Episode"> | Date | string
     updatedAt?: DateTimeFilter<"Episode"> | Date | string
+    episodeNum?: IntNullableFilter<"Episode"> | number | null
   }
 
   export type DramaCreateWithoutEpisodesInput = {
@@ -4305,44 +4425,44 @@ export namespace Prisma {
     id?: string
     slug: string
     title: string
-    episodeNum?: string | null
     videoSrc: string
     publishedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    episodeNum?: number | null
   }
 
   export type EpisodeUpdateWithoutDramaInput = {
     id?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
-    episodeNum?: NullableStringFieldUpdateOperationsInput | string | null
     videoSrc?: StringFieldUpdateOperationsInput | string
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    episodeNum?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type EpisodeUncheckedUpdateWithoutDramaInput = {
     id?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
-    episodeNum?: NullableStringFieldUpdateOperationsInput | string | null
     videoSrc?: StringFieldUpdateOperationsInput | string
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    episodeNum?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type EpisodeUncheckedUpdateManyWithoutDramaInput = {
     id?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
-    episodeNum?: NullableStringFieldUpdateOperationsInput | string | null
     videoSrc?: StringFieldUpdateOperationsInput | string
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    episodeNum?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
 
