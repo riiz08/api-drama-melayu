@@ -4,33 +4,34 @@ import prisma from "../prisma";
 const router = Router();
 
 router.get("/", async (req: Request, res: Response) => {
+  const { q } = req.query; // ambil query 'title' dari URL
+
+  if (!q) {
+    return void res
+      .status(400)
+      .json({ message: "Title query parameter is required." });
+  }
+
   try {
-    const q = req.query.q as string;
-
-    if (!q) {
-      return void res
-        .status(400)
-        .json({ success: false, message: "Query 'q' is required" });
-    }
-
     const dramas = await prisma.drama.findMany({
       where: {
         title: {
-          contains: q,
-          mode: "insensitive",
+          contains: q as string, // menggunakan 'contains' untuk pencarian yang lebih fleksibel
+          mode: "insensitive", // agar pencarian tidak case-sensitive
         },
       },
     });
 
-    if (!dramas) {
+    if (dramas.length === 0) {
       return void res
         .status(404)
-        .json({ success: false, message: "Drama not found!" });
+        .json({ message: "No dramas found with that title." });
     }
 
-    res.status(200).json({ success: true, dramas });
+    res.json(dramas);
   } catch (error) {
-    return void res.status(500).json({ success: false, message: error });
+    console.error(error);
+    res.status(500).json({ message: "Error fetching dramas." });
   }
 });
 
