@@ -8,7 +8,6 @@ import episodeDetail from "./routes/episodeDetail";
 import dotenv from "dotenv";
 import dramaDetail from "./routes/dramaDetail";
 import latestUpdate from "./routes/latestUpdate";
-import "./jobs/batchScraper";
 import searchDrama from "./routes/searchDrama";
 
 dotenv.config();

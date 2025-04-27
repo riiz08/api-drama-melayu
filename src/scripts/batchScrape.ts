@@ -1,5 +1,6 @@
 import { fetchEpisodeLinks } from "../libs/fetchEpisodeList";
 import { scrapeEpisode } from "../libs/scrapeEpisode";
+import cron from "node-cron";
 
 // Daftar judul drama yang ingin di-scrape
 const dramaSlugs = [
@@ -33,4 +34,7 @@ async function batchScrape() {
   console.log("✅ Batch scrape selesai.");
 }
 
-batchScrape();
+cron.schedule("0 */3 * * *", async () => {
+  console.log("🕛 Menjalankan batch scrape otomatis...");
+  await batchScrape();
+});
