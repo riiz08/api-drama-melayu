@@ -54,8 +54,8 @@ async function batchScrape() {
 }
 
 // Schedule cron job
-cron.schedule("* * * * *", async () => {
-  // Setiap jam 1 pagi
+cron.schedule("0 */3 * * *", async () => {
+  // Setiap 3 jam sekali
   console.log("⏰ Menjalankan cronjob scraping drama...");
   await batchScrape();
 });
