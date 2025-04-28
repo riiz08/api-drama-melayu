@@ -13,7 +13,6 @@ const episodeDetail_1 = __importDefault(require("./routes/episodeDetail"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const dramaDetail_1 = __importDefault(require("./routes/dramaDetail"));
 const latestUpdate_1 = __importDefault(require("./routes/latestUpdate"));
-require("./jobs/batchScraper");
 const searchDrama_1 = __importDefault(require("./routes/searchDrama"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();

@@ -36,7 +36,13 @@ router.get("/episode/:slug", async (req, res) => {
         const currentEpisodeNum = extractEpisodeNum(episode.slug);
         const prevEpisode = sortedEpisodes.find((ep) => ep.episodeNum === currentEpisodeNum - 1);
         const nextEpisode = sortedEpisodes.find((ep) => ep.episodeNum === currentEpisodeNum + 1);
+        const drama = await prisma_1.default.drama.findFirst({
+            where: {
+                id: episode.dramaId,
+            },
+        });
         res.json({
+            drama,
             episode,
             prevEpisode: prevEpisode
                 ? { slug: prevEpisode.slug, title: prevEpisode.title }

@@ -38,7 +38,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const cheerio = __importStar(require("cheerio"));
-const puppeteer_1 = __importDefault(require("puppeteer"));
+const puppeteer_1 = __importDefault(require("puppeteer")); // ✅ Import HTTPRequest di sini
 const image_1 = require("../utils/image");
 const createSlug_1 = require("../libs/createSlug");
 const prisma_1 = __importDefault(require("../prisma"));
@@ -56,17 +56,18 @@ router.get("/:year/:month/:slug", async (req, res) => {
         await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
         const videoUrls = [];
         await page.setRequestInterception(true);
-        page.on("request", (req) => req.continue());
-        page.on("request", async (request) => {
+        page.on("request", (request) => {
+            // ✅ Typing benar
             const resUrl = request.url();
             if (resUrl.includes(".m3u8") || resUrl.includes("filemoon.to")) {
                 if (!videoUrls.includes(resUrl)) {
                     videoUrls.push(resUrl);
                 }
             }
+            request.continue(); // ✅ Wajib panggil continue
         });
         await page.goto(url, { waitUntil: "networkidle2", timeout: 0 });
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 3000)); // ✅ Lebih efisien daripada Promise manual
         const html = await page.content();
         await browser.close();
         const $ = cheerio.load(html);
@@ -115,7 +116,7 @@ router.get("/:year/:month/:slug", async (req, res) => {
             .trim();
         const rawThumbnail = $(".entry-content-wrap").find("img").attr("src") || "";
         const thumbnail = (0, image_1.upgradePosterUrl)(rawThumbnail);
-        //Upsert Drama
+        // Upsert Drama
         const drama = await prisma_1.default.drama.upsert({
             where: { slug: dramaSlug },
             update: {},
@@ -131,8 +132,8 @@ router.get("/:year/:month/:slug", async (req, res) => {
                 slug: dramaSlug,
             },
         });
-        if (videoUrls[0]) {
-            // Upsert Episode (hindari duplikat slug)
+        if (videoUrls.length > 0) {
+            // Upsert Episode
             await prisma_1.default.episode.upsert({
                 where: { slug: episodeSlug },
                 update: {
@@ -153,7 +154,7 @@ router.get("/:year/:month/:slug", async (req, res) => {
             });
         }
         else {
-            console.warn(`Video not saved, skip episode: ${episodeTitle}`);
+            console.warn(`Video not found. Skipping episode: ${episodeTitle}`);
         }
         res.json({
             success: true,
@@ -170,7 +171,7 @@ router.get("/:year/:month/:slug", async (req, res) => {
                     rangkaian,
                     pengarah,
                     produksi,
-                    videoSrc: videoUrls[0] || null, // Ambil yang pertama jika ada
+                    videoSrc: videoUrls[0] || null,
                     dramaSlug,
                     episodeSlug,
                     currentEpisode,

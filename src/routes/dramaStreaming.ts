@@ -1,10 +1,9 @@
 import { Router, Request, Response } from "express";
 import * as cheerio from "cheerio";
-import puppeteer from "puppeteer";
+import puppeteer, { HTTPRequest } from "puppeteer"; // ✅ Import HTTPRequest di sini
 import { upgradePosterUrl } from "../utils/image";
 import { createSlug } from "../libs/createSlug";
 import prisma from "../prisma";
-import { downloadM3U8ViaBrowser } from "../utils/downloadFile";
 
 const router = Router();
 
@@ -28,20 +27,20 @@ router.get("/:year/:month/:slug", async (req: Request, res: Response) => {
     const videoUrls: string[] = [];
 
     await page.setRequestInterception(true);
-    page.on("request", (req) => req.continue());
 
-    page.on("request", async (request) => {
+    page.on("request", (request: HTTPRequest) => {
+      // ✅ Typing benar
       const resUrl = request.url();
-
       if (resUrl.includes(".m3u8") || resUrl.includes("filemoon.to")) {
         if (!videoUrls.includes(resUrl)) {
           videoUrls.push(resUrl);
         }
       }
+      request.continue(); // ✅ Wajib panggil continue
     });
 
     await page.goto(url, { waitUntil: "networkidle2", timeout: 0 });
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 3000)); // ✅ Lebih efisien daripada Promise manual
 
     const html = await page.content();
     await browser.close();
@@ -59,11 +58,13 @@ router.get("/:year/:month/:slug", async (req: Request, res: Response) => {
       .trim();
     const title = $("h2").first().text().trim();
     const dramaSlug = createSlug(title);
+
     const currentEpisodeMatch =
       episodeTitle.match(/Episod\s*(\d+)/i)?.[1] || null;
     const currentEpisode = currentEpisodeMatch
       ? parseInt(currentEpisodeMatch, 10)
       : null;
+
     const totalEpisodes = $("b:contains('Episod:')")
       .parent()
       .text()
@@ -97,7 +98,7 @@ router.get("/:year/:month/:slug", async (req: Request, res: Response) => {
     const rawThumbnail = $(".entry-content-wrap").find("img").attr("src") || "";
     const thumbnail = upgradePosterUrl(rawThumbnail);
 
-    //Upsert Drama
+    // Upsert Drama
     const drama = await prisma.drama.upsert({
       where: { slug: dramaSlug },
       update: {},
@@ -114,8 +115,8 @@ router.get("/:year/:month/:slug", async (req: Request, res: Response) => {
       },
     });
 
-    if (videoUrls[0]) {
-      // Upsert Episode (hindari duplikat slug)
+    if (videoUrls.length > 0) {
+      // Upsert Episode
       await prisma.episode.upsert({
         where: { slug: episodeSlug },
         update: {
@@ -135,7 +136,7 @@ router.get("/:year/:month/:slug", async (req: Request, res: Response) => {
         },
       });
     } else {
-      console.warn(`Video not saved, skip episode: ${episodeTitle}`);
+      console.warn(`Video not found. Skipping episode: ${episodeTitle}`);
     }
 
     res.json({
@@ -153,7 +154,7 @@ router.get("/:year/:month/:slug", async (req: Request, res: Response) => {
           rangkaian,
           pengarah,
           produksi,
-          videoSrc: videoUrls[0] || null, // Ambil yang pertama jika ada
+          videoSrc: videoUrls[0] || null,
           dramaSlug,
           episodeSlug,
           currentEpisode,
