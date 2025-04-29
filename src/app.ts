@@ -9,6 +9,7 @@ import dotenv from "dotenv";
 import dramaDetail from "./routes/dramaDetail";
 import latestUpdate from "./routes/latestUpdate";
 import searchDrama from "./routes/searchDrama";
+import streamRewrite from "./routes/streamRewrite";
 import "./scripts/batchScrape";
 
 dotenv.config();
@@ -31,6 +32,7 @@ app.use("/api/v1", allDrama);
 app.use("/api/v1/drama", dramaDetail);
 app.use("/api/v1", episodeDetail);
 app.use("/api/v1/search", searchDrama);
+app.use("/api/v1/proxy/stream", streamRewrite);
 
 // Start server
 app.listen(PORT, () => {
