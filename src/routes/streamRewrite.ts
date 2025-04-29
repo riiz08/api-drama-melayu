@@ -11,27 +11,29 @@ router.get("/", async (req: Request, res: Response) => {
   }
 
   try {
-    const response = await axios.get(targetUrl, {
+    const { data } = await axios.get(targetUrl, {
       headers: {
-        "User-Agent": "Mozilla/5.0", // spoof UA
+        "User-Agent": "Mozilla/5.0",
       },
       responseType: "text",
     });
 
-    const baseUrl = new URL(targetUrl).origin;
-    const m3u8Content = response.data as string;
+    const baseUrl = targetUrl.substring(0, targetUrl.lastIndexOf("/") + 1);
 
-    // Rewrite semua URI (biasanya segment .ts atau nested .m3u8)
-    const rewritten = m3u8Content.replace(
-      /(.*\.ts)/g,
-      (match) => `${baseUrl}/${match}`
+    const rewritten = (data as string).replace(
+      /^(?!#)(.*\.ts.*)$/gm,
+      (line) => {
+        // Jika sudah absolute, jangan ubah
+        if (/^https?:\/\//.test(line)) return line;
+        return baseUrl + line;
+      }
     );
 
     res.setHeader("Content-Type", "application/vnd.apple.mpegurl");
     res.send(rewritten);
-  } catch (err: any) {
-    console.error("Rewrite error:", err.message);
-    res.status(500).send("Failed to rewrite m3u8");
+  } catch (error: any) {
+    console.error("Proxy rewrite error:", error.message);
+    res.status(500).send("Failed to proxy m3u8");
   }
 });
 
