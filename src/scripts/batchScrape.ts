@@ -1,4 +1,3 @@
-import cron from "node-cron";
 import { fetchEpisodeLinks } from "../libs/fetchEpisodeList";
 import { scrapeEpisode } from "../libs/scrapeEpisode";
 
@@ -12,9 +11,30 @@ const dramaSlugs = [
   "2025/03/sekam-di-dada-full-episod",
 ];
 
-// Helper untuk delay antar request
+// Delay helper
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Retry helper
+async function retry<T>(
+  fn: () => Promise<T>,
+  maxRetries = 5,
+  delayMs = 2000
+): Promise<T> {
+  let attempt = 0;
+  while (attempt < maxRetries) {
+    try {
+      return await fn();
+    } catch (err) {
+      attempt++;
+      console.warn(
+        `⚠️ Percobaan ke-${attempt} gagal. Ulangi dalam ${delayMs}ms...`
+      );
+      await delay(delayMs);
+    }
+  }
+  throw new Error(`Gagal setelah ${maxRetries} percobaan.`);
 }
 
 // Fungsi utama batch scrape
@@ -24,27 +44,30 @@ async function batchScrape() {
   for (const slug of dramaSlugs) {
     try {
       console.log(`🔍 Scraping list episode dari: ${slug}`);
-      const episodeLinks = await fetchEpisodeLinks(slug);
+      const episodeLinks = await retry(() => fetchEpisodeLinks(slug));
 
       for (const episodeUrl of episodeLinks) {
+        const parsed = new URL(episodeUrl);
+        const pathParts = parsed.pathname.split("/").filter(Boolean);
+        const fullSlug = pathParts.slice(-3).join("/");
+
         try {
-          const parsed = new URL(episodeUrl);
-          const pathParts = parsed.pathname.split("/").filter(Boolean);
-          const fullSlug = pathParts.slice(-3).join("/");
-
           console.log(`🎬 Scraping episode: ${fullSlug}`);
-          await scrapeEpisode(fullSlug);
-
-          await delay(2000); // Delay 2 detik antar episode biar server gak kejedot
+          await retry(() => scrapeEpisode(fullSlug));
         } catch (episodeError) {
-          console.error(`❌ Gagal scrape episode: ${episodeUrl}`, episodeError);
+          console.error(
+            `❌ Gagal scrape episode setelah retry: ${fullSlug}`,
+            episodeError
+          );
         }
+
+        await delay(2000); // Delay antar episode
       }
 
-      await delay(5000); // Delay 5 detik antar drama biar lebih santai
+      await delay(5000); // Delay antar drama
     } catch (dramaError) {
       console.error(
-        `❌ Gagal fetch episode list untuk drama: ${slug}`,
+        `❌ Gagal fetch episode list setelah retry: ${slug}`,
         dramaError
       );
     }
@@ -53,9 +76,4 @@ async function batchScrape() {
   console.log("✅ Batch scrape selesai semua.");
 }
 
-// Schedule cron job
-cron.schedule("0 */3 * * *", async () => {
-  // Setiap 3 jam sekali
-  console.log("⏰ Menjalankan cronjob scraping drama...");
-  await batchScrape();
-});
+batchScrape();

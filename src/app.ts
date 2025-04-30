@@ -9,7 +9,6 @@ import dotenv from "dotenv";
 import dramaDetail from "./routes/dramaDetail";
 import latestUpdate from "./routes/latestUpdate";
 import searchDrama from "./routes/searchDrama";
-import "./scripts/batchScrape";
 
 dotenv.config();
 
