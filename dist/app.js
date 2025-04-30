@@ -14,7 +14,6 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const dramaDetail_1 = __importDefault(require("./routes/dramaDetail"));
 const latestUpdate_1 = __importDefault(require("./routes/latestUpdate"));
 const searchDrama_1 = __importDefault(require("./routes/searchDrama"));
-require("./scripts/batchScrape");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());

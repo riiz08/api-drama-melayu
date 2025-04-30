@@ -20,7 +20,7 @@ function delay(ms: number) {
 async function retry<T>(
   fn: () => Promise<T>,
   maxRetries = 5,
-  delayMs = 2000
+  delayMs = 10000
 ): Promise<T> {
   let attempt = 0;
   while (attempt < maxRetries) {
